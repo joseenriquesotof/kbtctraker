@@ -5,7 +5,9 @@ on:
     # GitHub's cron floor is 5 min (and it lags under load). To get ~2-min
     # resolution the job loops internally, sampling several times per run
     # while the next scheduled run queues up behind it.
-    - cron: "*/5 * * * *"
+    # Avoid the exact 0/5/10... minute marks, where GitHub's scheduler is
+    # busiest and scheduled runs are more likely to be delayed or dropped.
+    - cron: "2-59/5 * * * *"
   workflow_dispatch:
     inputs:
       samples:
