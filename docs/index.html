@@ -10,7 +10,15 @@
     <div class="updated" id="updated">loading&hellip;</div>
   </header>
 
-  <div id="content"></div>
+  <nav class="tabs" id="tabs">
+    <button type="button" class="tab active" data-tab="live">Live</button>
+    <button type="button" class="tab" data-tab="insights">Insights</button>
+    <button type="button" class="tab" data-tab="calculator">Calculator</button>
+  </nav>
+
+  <div id="tab-live" class="tab-panel"></div>
+  <div id="tab-insights" class="tab-panel" hidden></div>
+  <div id="tab-calculator" class="tab-panel" hidden></div>
 
   <footer>
     Data from Kalshi's public market API and CoinGecko. Educational tracker, not trading advice.

@@ -2,16 +2,18 @@
 """Turn the raw JSONL/CSV snapshots into docs/data.json for the static
 dashboard. Pure stdlib -- no pandas, so it runs fast in CI with no deps.
 
-Field extraction is defensive: Kalshi's exact field names for the 15-minute
-BTC market are read from whatever the API actually returned (multiple
-candidate keys are tried), since the raw payload is stored verbatim by
-collect.py and this script is the only place that interprets it.
+Field extraction is defensive: Kalshi's KXBTC15M payload uses dollar-string
+prices (yes_bid_dollars: "0.5300") and *_fp volume fields, but older/cent
+integer names (yes_bid, volume) are kept as fallbacks. Raw payloads are
+stored verbatim by collect.py, and this script is the only place that
+interprets them.
 """
 from __future__ import annotations
 
 import csv
 import glob
 import json
+import math
 import os
 import statistics
 from datetime import datetime, timezone
@@ -22,6 +24,7 @@ OUT_PATH = os.path.join(REPO_ROOT, "docs", "data.json")
 
 MAX_CHART_POINTS = 288  # ~24h at 5-minute cadence
 MAX_RECENT_MARKETS = 60
+MAX_INSIGHT_MARKETS = 400
 GAP_CAP_SECONDS = 900  # cap time-weighting for any single sample gap
 
 
@@ -113,6 +116,10 @@ def result_of(m: dict) -> str:
     return r  # "yes", "no", or ""
 
 
+def is_live_status(status) -> bool:
+    return (status or "").lower() in ("active", "open")
+
+
 def build_market_records(snapshots: list[dict]) -> dict[str, dict]:
     by_ticker: dict[str, list[dict]] = {}
     for s in snapshots:
@@ -124,29 +131,44 @@ def build_market_records(snapshots: list[dict]) -> dict[str, dict]:
     records = {}
     for ticker, samples in by_ticker.items():
         samples.sort(key=lambda m: m.get("_ts", ""))
-        probs = [(m.get("_ts"), yes_prob(m)) for m in samples]
-        probs = [(t, p) for t, p in probs if p is not None]
-
-        volumes = [_num(_first(m, "volume_fp", "volume")) for m in samples]
-        volumes = [v for v in volumes if v is not None]
-
         last = samples[-1]
+        open_ts = _parse_ts(_first(last, "open_time"))
+        close_ts = _parse_ts(_first(last, "close_time"))
+
         strike = None
         for m in samples:
             strike = strike_of(m)
             if strike is not None:
                 break
 
+        # Only quotes taken while the market was live are meaningful --
+        # settled markets quote 0/100 junk, which would pollute ranges.
+        window: list[tuple[float, float]] = []
+        for m in samples:
+            t = _parse_ts(m.get("_ts"))
+            p = yes_prob(m)
+            if t is None or p is None:
+                continue
+            if open_ts is not None and close_ts is not None and not (open_ts <= t < close_ts):
+                continue
+            window.append((t, p))
+
+        prob_timeline = []
+        if open_ts is not None:
+            prob_timeline = [
+                [round((t - open_ts) / 60, 1), round(p, 1)] for t, p in window
+            ]
+
+        volumes = [_num(_first(m, "volume_fp", "volume")) for m in samples]
+        volumes = [v for v in volumes if v is not None]
+
         # time-weighted seconds leaning yes(>=50) vs no(<50)
         yes_secs = 0.0
         no_secs = 0.0
-        for i in range(len(probs) - 1):
-            t0, p0 = probs[i]
-            t1, _ = probs[i + 1]
-            e0, e1 = _parse_ts(t0), _parse_ts(t1)
-            if e0 is None or e1 is None:
-                continue
-            dt = min(max(e1 - e0, 0), GAP_CAP_SECONDS)
+        for i in range(len(window) - 1):
+            t0, p0 = window[i]
+            t1, _ = window[i + 1]
+            dt = min(max(t1 - t0, 0), GAP_CAP_SECONDS)
             if p0 >= 50:
                 yes_secs += dt
             else:
@@ -163,13 +185,18 @@ def build_market_records(snapshots: list[dict]) -> dict[str, dict]:
             "result": result_of(last),
             "first_seen_ts": samples[0].get("_ts"),
             "last_seen_ts": last.get("_ts"),
-            "yes_prob_first": probs[0][1] if probs else None,
-            "yes_prob_last": probs[-1][1] if probs else None,
-            "yes_prob_min": min(p for _, p in probs) if probs else None,
-            "yes_prob_max": max(p for _, p in probs) if probs else None,
+            "yes_prob_first": round(window[0][1], 1) if window else None,
+            "yes_prob_last": round(window[-1][1], 1) if window else None,
+            "yes_prob_min": round(min(p for _, p in window), 1) if window else None,
+            "yes_prob_max": round(max(p for _, p in window), 1) if window else None,
+            "yes_bid_pct": _pct_field(last, "yes_bid_dollars", "yes_bid"),
+            "yes_ask_pct": _pct_field(last, "yes_ask_dollars", "yes_ask"),
+            "no_bid_pct": _pct_field(last, "no_bid_dollars", "no_bid"),
+            "no_ask_pct": _pct_field(last, "no_ask_dollars", "no_ask"),
             "volume_max": max(volumes) if volumes else None,
             "open_interest": _num(_first(last, "open_interest_fp", "open_interest")),
             "sample_count": len(samples),
+            "prob_timeline": prob_timeline,
             "yes_leaning_seconds": yes_secs,
             "no_leaning_seconds": no_secs,
         }
@@ -183,8 +210,6 @@ def rolling_volatility(btc_series: list[tuple[float, float]], window: int = 12):
     prev_price = None
     for t, p in btc_series:
         if prev_price and prev_price > 0 and p > 0:
-            import math
-
             returns.append(math.log(p / prev_price))
         else:
             returns.append(None)
@@ -195,6 +220,60 @@ def rolling_volatility(btc_series: list[tuple[float, float]], window: int = 12):
         else:
             out.append((t, None))
     return out
+
+
+def build_series(snapshots, btc_series):
+    """Per-collector-run time series: BTC price, active market's strike,
+    yes bid, no bid, and mid probability, all aligned on run timestamps."""
+    price_map = {t: p for t, p in btc_series}
+    vol_map = {t: v for t, v in rolling_volatility(btc_series)}
+
+    # For each run timestamp, the snapshot of the market live at that moment.
+    active_by_ts: dict[float, dict] = {}
+    for s in snapshots:
+        if not is_live_status(s.get("status")):
+            continue
+        t = _parse_ts(s.get("_ts"))
+        if t is None:
+            continue
+        o, c = _parse_ts(s.get("open_time")), _parse_ts(s.get("close_time"))
+        if o is not None and c is not None and o <= t < c:
+            active_by_ts[t] = s
+        else:
+            active_by_ts.setdefault(t, s)
+
+    all_ts = sorted(set(price_map) | set(active_by_ts))[-MAX_CHART_POINTS:]
+
+    def rnd(v, digits=1):
+        return round(v, digits) if v is not None else None
+
+    series = {
+        "timestamps": [],
+        "btc_usd": [],
+        "strike_usd": [],
+        "yes_bid_pct": [],
+        "no_bid_pct": [],
+        "yes_prob_pct": [],
+        "volatility_pct": [],
+    }
+    for t in all_ts:
+        snap = active_by_ts.get(t)
+        series["timestamps"].append(
+            datetime.fromtimestamp(t, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        )
+        series["btc_usd"].append(price_map.get(t))
+        series["strike_usd"].append(rnd(_num(strike_of(snap)) if snap else None, 2))
+        series["yes_bid_pct"].append(
+            rnd(_pct_field(snap, "yes_bid_dollars", "yes_bid") if snap else None)
+        )
+        series["no_bid_pct"].append(
+            rnd(_pct_field(snap, "no_bid_dollars", "no_bid") if snap else None)
+        )
+        series["yes_prob_pct"].append(rnd(yes_prob(snap) if snap else None))
+        series["volatility_pct"].append(
+            round(vol_map[t], 4) if vol_map.get(t) is not None else None
+        )
+    return series
 
 
 def iso(ts: float | None) -> str | None:
@@ -210,13 +289,14 @@ def main() -> int:
 
     now = datetime.now(timezone.utc).timestamp()
 
-    # --- current market (open, closest close_time in the future) ---
-    open_candidates = [
+    # --- current market: live status, prefer one still open now ---
+    live = [
         r for r in market_records.values()
-        if (r.get("status") or "").lower() in ("active", "open") and _parse_ts(r.get("close_time"))
+        if is_live_status(r.get("status")) and _parse_ts(r.get("close_time"))
     ]
-    open_candidates.sort(key=lambda r: _parse_ts(r["close_time"]))
-    current = open_candidates[0] if open_candidates else None
+    live.sort(key=lambda r: _parse_ts(r["close_time"]))
+    still_open = [r for r in live if _parse_ts(r["close_time"]) > now - 60]
+    current = still_open[0] if still_open else (live[-1] if live else None)
 
     current_btc = btc_series[-1][1] if btc_series else None
     current_block = None
@@ -234,13 +314,24 @@ def main() -> int:
             "seconds_remaining": seconds_remaining,
         }
 
-    # --- recent settled markets table ---
+    # --- settled markets ---
     settled = [
         r for r in market_records.values()
         if r.get("result") in ("yes", "no")
     ]
     settled.sort(key=lambda r: _parse_ts(r.get("close_time")) or 0, reverse=True)
     recent_markets = settled[:MAX_RECENT_MARKETS]
+
+    # Slim per-market records for the Insights tab (more history, fewer fields).
+    insight_markets = [
+        {
+            "close_time": r["close_time"],
+            "result": r["result"],
+            "volume": r["volume_max"],
+            "timeline": r["prob_timeline"],
+        }
+        for r in settled[:MAX_INSIGHT_MARKETS]
+    ]
 
     # --- win-rate / streak stats ---
     chrono = sorted(settled, key=lambda r: _parse_ts(r.get("close_time")) or 0)
@@ -276,53 +367,24 @@ def main() -> int:
         "pct_time_no_leaning": (total_no_secs / total_secs * 100) if total_secs else None,
     }
 
-    # --- chart series (last MAX_CHART_POINTS btc price samples) ---
-    btc_tail = btc_series[-MAX_CHART_POINTS:]
-    vol_series = rolling_volatility(btc_series)[-MAX_CHART_POINTS:]
-
-    # strike + yes_prob step-series: for each btc sample time, find the
-    # market whose [open_time, close_time) window contains it.
-    windows = [
-        r for r in market_records.values()
-        if _parse_ts(r.get("open_time")) and _parse_ts(r.get("close_time"))
-    ]
-    windows.sort(key=lambda r: _parse_ts(r["open_time"]))
-
-    def market_at(t: float):
-        for r in windows:
-            o, c = _parse_ts(r["open_time"]), _parse_ts(r["close_time"])
-            if o <= t < c:
-                return r
-        return None
-
-    strike_series = []
-    yes_prob_series = []
-    for t, _ in btc_tail:
-        m = market_at(t)
-        strike_series.append((t, m.get("strike") if m else None))
-        yes_prob_series.append((t, m.get("yes_prob_last") if m else None))
-
-    series = {
-        "timestamps": [iso(t) for t, _ in btc_tail],
-        "btc_usd": [p for _, p in btc_tail],
-        "strike_usd": [s for _, s in strike_series],
-        "yes_prob_pct": [p for _, p in yes_prob_series],
-        "volatility_pct": [v for _, v in vol_series],
-    }
-
     out = {
         "generated_at": iso(now),
         "series_ticker": "KXBTC15M",
         "current": current_block,
         "summary": summary,
         "recent_markets": recent_markets,
-        "series": series,
+        "insight_markets": insight_markets,
+        "series": build_series(snapshots, btc_series),
     }
 
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w") as f:
         json.dump(out, f, indent=2)
-    print(f"Wrote {OUT_PATH}: {len(market_records)} markets, {len(btc_tail)} price points")
+    print(
+        f"Wrote {OUT_PATH}: {len(market_records)} markets, "
+        f"{len(out['series']['timestamps'])} series points, "
+        f"{len(insight_markets)} insight markets"
+    )
     return 0
 
 
