@@ -59,6 +59,17 @@ public repo.
    the Pages URL — `docs/data.json` will exist and the dashboard will
    populate.
 
+### Alternative: deploying the dashboard on Vercel
+
+The repo includes a `vercel.json` with `"outputDirectory": "docs"`, so
+importing the repo into Vercel serves the dashboard instead of a blank
+page. Note that Vercel only hosts the static `docs/` folder — the actual
+data collection still runs on the GitHub Actions schedule described
+above and commits `docs/data.json` back to the branch; Vercel's Git
+integration then redeploys automatically to pick it up (every commit the
+collector makes triggers a redeploy, so expect frequent deployments on
+whichever branch Vercel is tracking).
+
 ## Data notes & limitations
 
 - **Resolution**: GitHub Actions cron tops out at 5-minute intervals (and
