@@ -1,5 +1,6 @@
 const SVG_NS = "http://www.w3.org/2000/svg";
 const VB_W = 1000;
+const DATA_REFRESH_MS = 60 * 1000;
 const tooltipEl = document.getElementById("tooltip");
 
 // ---------- formatting ----------
@@ -478,7 +479,7 @@ function renderCalculator(root, data) {
     el("div", { class: "hint", html: `
       <ul>
         <li>Prices are entered as <b>%</b>, matching what Kalshi shows. A 45% YES price means each YES contract costs $0.45 and pays $1 if UP wins.</li>
-        <li><b>Use ask prices</b>, not bids — you buy each side at its ask. "Use live ask prices" fills the last collected snapshot (up to ~5 min old; the real book moves faster, so always confirm on Kalshi before ordering).</li>
+        <li><b>Use ask prices</b>, not bids — you buy each side at its ask. "Use live ask prices" fills the last collected snapshot. The collector samples Kalshi about every 2 minutes, but published data can lag while GitHub Actions commits and the site redeploys, so always confirm on Kalshi before ordering.</li>
         <li>Staking <b>different amounts</b> on each side tilts your payout: more on the side you think is likelier raises that outcome's profit but lowers the other. The "Guaranteed (worst case)" tile shows what you keep if the less-favorable side wins.</li>
         <li>Both orders must actually fill at those prices for the math to hold — partial fills leave you directional.</li>
         <li>Fee formula is Kalshi's published 7% taker formula and may not match every market/promotion exactly.</li>
@@ -544,7 +545,7 @@ function renderInsights(root, data) {
     el("h2", {}, ["What is this?"]),
     el("div", { class: "desc" }, [
       `Pattern statistics computed automatically from every market this tracker has recorded (${markets.length} settled so far, ${withTl.length} with sampled in-market odds, ${withDiff.length} with BTC-vs-target gaps). ` +
-      `Odds and price are sampled every ~5 minutes by the collector, so each 15-minute market has roughly 2–3 readings — patterns get sharper as more data accumulates.`,
+      `Odds and price are sampled about every 2 minutes by the collector while GitHub Actions publishes updates roughly every 5 minutes, so each 15-minute market usually has 6–8 readings — patterns get sharper as more data accumulates.`,
     ]),
   ]));
 
@@ -696,11 +697,18 @@ function initTabs() {
 }
 
 // ---------- boot ----------
-async function main() {
-  initTabs();
+function clearPanel(id) {
+  document.getElementById(id).replaceChildren();
+}
+
+async function loadAndRender() {
+  clearPanel("tab-live");
+  clearPanel("tab-insights");
+  clearPanel("tab-calculator");
+
   let data = null;
   try {
-    const res = await fetch("data.json", { cache: "no-store" });
+    const res = await fetch("data.json?ts=" + Date.now(), { cache: "no-store" });
     if (!res.ok) throw new Error(res.status);
     data = await res.json();
   } catch (e) {
@@ -721,6 +729,12 @@ async function main() {
   renderLive(document.getElementById("tab-live"), data);
   renderInsights(document.getElementById("tab-insights"), data);
   renderCalculator(document.getElementById("tab-calculator"), data);
+}
+
+async function main() {
+  initTabs();
+  await loadAndRender();
+  setInterval(loadAndRender, DATA_REFRESH_MS);
 }
 
 main();
