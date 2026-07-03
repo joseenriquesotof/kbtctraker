@@ -31,9 +31,12 @@ GitHub Actions (every 5 min)          docs/ (GitHub Pages)
 - **`collector/aggregate.py`** reads that raw log and computes the derived
   stats (volatility, time-weighted % spent above/below 50%, win rate,
   streaks, per-market summaries) into `docs/data.json`.
-- **`.github/workflows/collect.yml`** runs both scripts every 5 minutes
-  (GitHub's minimum cron resolution) and commits the results back to the
-  repo. This is why it needs `contents: write` permission.
+- **`.github/workflows/collect.yml`** is launched by cron every 5 minutes
+  (GitHub's minimum) and *loops internally*, taking several snapshots per
+  run (default 3, 120s apart) so the effective cadence is ~2 minutes. It
+  aggregates once at the end and commits the results back to the repo,
+  which is why it needs `contents: write` permission. Public repos get
+  unlimited free Actions minutes, so the extra runner time is free.
 - **`docs/`** is a static, dependency-free HTML/JS dashboard (no build
   step, no CDN) that reads `docs/data.json` and renders it. It's meant to
   be served by GitHub Pages.
@@ -72,11 +75,15 @@ whichever branch Vercel is tracking).
 
 ## Data notes & limitations
 
-- **Resolution**: GitHub Actions cron tops out at 5-minute intervals (and
-  can lag a few extra minutes under load), so each 15-minute Kalshi market
-  is sampled roughly 2-3 times, not continuously. Good enough to see the
-  shape of each window and to build up long-run stats; not a
-  tick-by-tick trading feed.
+- **Resolution**: GitHub Actions cron can only *launch* a run every 5
+  minutes (and may lag under load), but each run loops internally to take
+  a snapshot about every 2 minutes, so a 15-minute market gets roughly
+  6-7 readings. Good for seeing the shape of each window and building
+  long-run stats; still not a tick-by-tick trading feed. For tighter or
+  guaranteed timing, run the collector locally (see below) where you
+  control the interval down to seconds. To change the cadence, edit
+  `SAMPLES`/`INTERVAL` in `.github/workflows/collect.yml`, or trigger a
+  run manually with custom values via Actions → Run workflow.
 - **Target/strike price**: shown as "Kalshi Target" — the BTC price the
   active contract settles against (Kalshi's `floor_strike`/`cap_strike`).
 - **YES probability**: the mid of Kalshi's live yes bid/ask, in %. This
