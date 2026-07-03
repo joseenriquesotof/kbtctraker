@@ -78,12 +78,23 @@ def load_btc_price_series() -> list[tuple[float, float]]:
     return out
 
 
+def _pct_field(m: dict, dollar_key: str, cent_key: str) -> float | None:
+    """Kalshi returns prices as dollar-strings like "0.5300" (0-1) on most
+    markets, but some endpoints/eras use cent integers (0-100) instead --
+    try the dollar field first and scale it, then fall back to cents as-is.
+    """
+    dollars = _num(_first(m, dollar_key))
+    if dollars is not None:
+        return dollars * 100
+    return _num(_first(m, cent_key))
+
+
 def yes_prob(m: dict) -> float | None:
-    bid = _num(_first(m, "yes_bid"))
-    ask = _num(_first(m, "yes_ask"))
+    bid = _pct_field(m, "yes_bid_dollars", "yes_bid")
+    ask = _pct_field(m, "yes_ask_dollars", "yes_ask")
     if bid is not None and ask is not None:
         return (bid + ask) / 2
-    last = _num(_first(m, "last_price"))
+    last = _pct_field(m, "last_price_dollars", "last_price")
     if last is not None:
         return last
     if bid is not None:
@@ -116,7 +127,7 @@ def build_market_records(snapshots: list[dict]) -> dict[str, dict]:
         probs = [(m.get("_ts"), yes_prob(m)) for m in samples]
         probs = [(t, p) for t, p in probs if p is not None]
 
-        volumes = [_num(_first(m, "volume")) for m in samples]
+        volumes = [_num(_first(m, "volume_fp", "volume")) for m in samples]
         volumes = [v for v in volumes if v is not None]
 
         last = samples[-1]
@@ -157,7 +168,7 @@ def build_market_records(snapshots: list[dict]) -> dict[str, dict]:
             "yes_prob_min": min(p for _, p in probs) if probs else None,
             "yes_prob_max": max(p for _, p in probs) if probs else None,
             "volume_max": max(volumes) if volumes else None,
-            "open_interest": _num(_first(last, "open_interest")),
+            "open_interest": _num(_first(last, "open_interest_fp", "open_interest")),
             "sample_count": len(samples),
             "yes_leaning_seconds": yes_secs,
             "no_leaning_seconds": no_secs,
@@ -202,7 +213,7 @@ def main() -> int:
     # --- current market (open, closest close_time in the future) ---
     open_candidates = [
         r for r in market_records.values()
-        if (r.get("status") or "").lower() == "open" and _parse_ts(r.get("close_time"))
+        if (r.get("status") or "").lower() in ("active", "open") and _parse_ts(r.get("close_time"))
     ]
     open_candidates.sort(key=lambda r: _parse_ts(r["close_time"]))
     current = open_candidates[0] if open_candidates else None
