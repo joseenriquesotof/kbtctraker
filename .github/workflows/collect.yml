@@ -1,0 +1,50 @@
+name: Collect Kalshi BTC 15-min data
+
+on:
+  schedule:
+    # Every 5 minutes (GitHub's minimum cron resolution). Actual runs may
+    # lag a few minutes under load -- this is a free-tier limitation.
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kalshi-collector
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Collect snapshot
+        run: python collector/collect.py
+
+      - name: Build dashboard data
+        run: python collector/aggregate.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "kbtctraker-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/raw docs/data.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "data: snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          for i in 1 2 3 4; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            sleep $((i * 3))
+          done
