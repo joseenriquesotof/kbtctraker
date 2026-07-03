@@ -370,9 +370,11 @@ function kalshiFeeDollars(contracts, priceDollars) {
 function renderCalculator(root, data) {
   const c = data && data.current;
 
-  const yesInput = el("input", { type: "number", id: "calc-yes", min: "0.1", max: "99.9", step: "0.1", value: "53" });
-  const noInput = el("input", { type: "number", id: "calc-no", min: "0.1", max: "99.9", step: "0.1", value: "47" });
-  const nInput = el("input", { type: "number", id: "calc-n", min: "1", step: "1", value: "100" });
+  // Prices in % (like Kalshi), money staked per side in $.
+  const yesPriceInput = el("input", { type: "number", id: "calc-yes-p", min: "0.1", max: "99.9", step: "0.1", value: "45" });
+  const noPriceInput = el("input", { type: "number", id: "calc-no-p", min: "0.1", max: "99.9", step: "0.1", value: "38" });
+  const yesMoneyInput = el("input", { type: "number", id: "calc-yes-m", min: "0", step: "1", value: "200" });
+  const noMoneyInput = el("input", { type: "number", id: "calc-no-m", min: "0", step: "1", value: "200" });
   const feeCheck = el("input", { type: "checkbox", id: "calc-fees" });
   feeCheck.checked = true;
 
@@ -384,63 +386,89 @@ function renderCalculator(root, data) {
     liveBtn.title = "No live prices in the last snapshot";
   }
   liveBtn.addEventListener("click", () => {
-    yesInput.value = liveYes.toFixed(1);
-    noInput.value = liveNo.toFixed(1);
+    yesPriceInput.value = liveYes.toFixed(1);
+    noPriceInput.value = liveNo.toFixed(1);
     recompute();
   });
 
   const verdictEl = el("div", { class: "verdict bad" }, ["–"]);
-  const resultsEl = el("div", { class: "tiles" });
+  const scenarioEl = el("div", { class: "tiles" });
+  const detailEl = el("div", { class: "tiles" });
   const breakevenEl = el("div", { class: "hint" });
 
   function recompute() {
-    const yes = parseFloat(yesInput.value);
-    const no = parseFloat(noInput.value);
-    const n = Math.max(1, Math.floor(parseFloat(nInput.value) || 1));
-    if (Number.isNaN(yes) || Number.isNaN(no)) return;
+    const yesP = parseFloat(yesPriceInput.value);   // %
+    const noP = parseFloat(noPriceInput.value);     // %
+    const yesMoney = Math.max(0, parseFloat(yesMoneyInput.value) || 0);
+    const noMoney = Math.max(0, parseFloat(noMoneyInput.value) || 0);
+    if (Number.isNaN(yesP) || Number.isNaN(noP) || yesP <= 0 || noP <= 0) return;
 
-    const combined = yes + no; // cents
-    const cost = n * combined / 100; // dollars
+    // Kalshi has fractional trading, so money / price = contracts (each pays $1).
+    const yesContracts = yesMoney / (yesP / 100);
+    const noContracts = noMoney / (noP / 100);
+    const totalStaked = yesMoney + noMoney;
+
     const fees = feeCheck.checked
-      ? kalshiFeeDollars(n, yes / 100) + kalshiFeeDollars(n, no / 100)
+      ? kalshiFeeDollars(yesContracts, yesP / 100) + kalshiFeeDollars(noContracts, noP / 100)
       : 0;
-    const payout = n * 1.0; // exactly one side pays $1
-    const profit = payout - cost - fees;
-    const profitPct = cost + fees > 0 ? (profit / (cost + fees)) * 100 : null;
 
-    verdictEl.className = "verdict " + (profit > 0 ? "good" : "bad");
-    verdictEl.textContent = profit > 0
-      ? `✓ Guaranteed profit: ${fmtUsd(profit, 2)} (${profitPct.toFixed(2)}% return)`
-      : `✗ No arbitrage — you would lose ${fmtUsd(-profit, 2)} no matter the outcome`;
+    // If UP (YES) wins: YES contracts pay $1 each, NO stake is lost.
+    const profitIfUp = yesContracts * 1.0 - totalStaked - fees;
+    // If DOWN (NO) wins: NO contracts pay $1 each, YES stake is lost.
+    const profitIfDown = noContracts * 1.0 - totalStaked - fees;
+    const worst = Math.min(profitIfUp, profitIfDown);
+    const best = Math.max(profitIfUp, profitIfDown);
 
-    resultsEl.innerHTML = "";
-    resultsEl.appendChild(tile("Combined price", combined.toFixed(1) + "¢", "YES + NO"));
-    resultsEl.appendChild(tile("Total cost", fmtUsd(cost, 2), `${n} contracts each side`));
-    resultsEl.appendChild(tile("Est. fees", feeCheck.checked ? fmtUsd(fees, 2) : "excluded", "Kalshi 7% formula"));
-    resultsEl.appendChild(tile("Guaranteed payout", fmtUsd(payout, 2), "one side always pays $1"));
-    resultsEl.appendChild(tile("Profit either way", fmtUsd(profit, 2), profitPct === null ? "" : profitPct.toFixed(2) + "% on capital", profit > 0 ? "up" : "down"));
+    verdictEl.className = "verdict " + (worst > 0 ? "good" : best > 0 ? "warn" : "bad");
+    if (worst > 0) {
+      const retPct = totalStaked + fees > 0 ? (worst / (totalStaked + fees)) * 100 : 0;
+      verdictEl.textContent = `✓ Profit either way — you make at least ${fmtUsd(worst, 2)} (${retPct.toFixed(2)}% guaranteed)`;
+    } else if (best > 0) {
+      verdictEl.textContent = `~ Directional — you profit ${fmtUsd(best, 2)} if one side wins, but lose ${fmtUsd(-worst, 2)} if the other does`;
+    } else {
+      verdictEl.textContent = `✗ Losing either way — you lose at least ${fmtUsd(-best, 2)} no matter the outcome`;
+    }
 
-    const beCombined = 100 - (fees / n) * 100;
-    breakevenEl.textContent = feeCheck.checked
-      ? `Breakeven: with these fees, YES + NO must be below ${beCombined.toFixed(1)}¢ to profit. Fees are an estimate of Kalshi's taker formula ceil(0.07 × contracts × price × (1−price)) per side.`
-      : `Breakeven without fees: YES + NO must be below 100.0¢.`;
+    scenarioEl.innerHTML = "";
+    scenarioEl.appendChild(tile("If UP (YES) wins", fmtUsd(profitIfUp, 2),
+      `${fmtNum(yesContracts)} contracts pay $1`, profitIfUp >= 0 ? "up" : "down"));
+    scenarioEl.appendChild(tile("If DOWN (NO) wins", fmtUsd(profitIfDown, 2),
+      `${fmtNum(noContracts)} contracts pay $1`, profitIfDown >= 0 ? "up" : "down"));
+    scenarioEl.appendChild(tile("Guaranteed (worst case)", fmtUsd(worst, 2), "the outcome you'd least want", worst >= 0 ? "up" : "down"));
+
+    detailEl.innerHTML = "";
+    detailEl.appendChild(tile("Total staked", fmtUsd(totalStaked, 2), `${fmtUsd(yesMoney, 0)} up · ${fmtUsd(noMoney, 0)} down`));
+    detailEl.appendChild(tile("YES contracts", fmtNum(yesContracts), `at ${yesP}% = ${(yesP / 100).toFixed(2)}$ each`));
+    detailEl.appendChild(tile("NO contracts", fmtNum(noContracts), `at ${noP}% = ${(noP / 100).toFixed(2)}$ each`));
+    detailEl.appendChild(tile("Est. fees", feeCheck.checked ? fmtUsd(fees, 2) : "excluded", "Kalshi 7% formula"));
+
+    // For equal stakes, a guaranteed profit exists iff yesP + noP < 100.
+    breakevenEl.innerHTML =
+      `Combined price is <b>${(yesP + noP).toFixed(1)}%</b> (YES ${yesP}% + NO ${noP}%). ` +
+      (yesP + noP < 100
+        ? `Below 100% — a locked-in profit is possible if you size both sides so each outcome pays back more than your total stake (before fees).`
+        : `At or above 100% — no both-sides profit exists here before fees; one side must win to come out ahead.`) +
+      ` Fees are an estimate of Kalshi's taker formula ceil(0.07 × contracts × price × (1−price)) per side.`;
   }
 
-  [yesInput, noInput, nInput].forEach((i) => i.addEventListener("input", recompute));
+  [yesPriceInput, noPriceInput, yesMoneyInput, noMoneyInput].forEach((i) => i.addEventListener("input", recompute));
   feeCheck.addEventListener("change", recompute);
 
   root.appendChild(el("div", { class: "panel" }, [
-    el("h2", {}, ["Both-Sides (Arbitrage) Calculator"]),
-    el("div", { class: "desc" }, ["Exactly one of YES/NO pays $1 per contract at settlement. If you can buy both sides for a combined price below 100¢ (after fees), the profit is locked in regardless of which way BTC moves."]),
+    el("h2", {}, ["Both-Sides Position Calculator"]),
+    el("div", { class: "desc" }, ["Enter the price of each side (in %, like Kalshi shows) and how much money you'd stake on each. It works out the contracts, the profit if UP wins, the profit if DOWN wins, and whether you come out ahead no matter what. You can stake different amounts on each side."]),
     el("div", { class: "calc-grid" }, [
-      el("div", { class: "field" }, [el("label", { for: "calc-yes" }, ["YES (Up) price — ¢"]), yesInput]),
-      el("div", { class: "field" }, [el("label", { for: "calc-no" }, ["NO (Down) price — ¢"]), noInput]),
-      el("div", { class: "field" }, [el("label", { for: "calc-n" }, ["Contracts per side"]), nInput]),
+      el("div", { class: "field" }, [el("label", { for: "calc-yes-p" }, ["YES (Up) price — %"]), yesPriceInput]),
+      el("div", { class: "field" }, [el("label", { for: "calc-yes-m" }, ["Money on YES — $"]), yesMoneyInput]),
+      el("div", { class: "field" }, [el("label", { for: "calc-no-p" }, ["NO (Down) price — %"]), noPriceInput]),
+      el("div", { class: "field" }, [el("label", { for: "calc-no-m" }, ["Money on NO — $"]), noMoneyInput]),
       el("label", { class: "check" }, [feeCheck, "Include estimated Kalshi fees"]),
       el("div", {}, [liveBtn]),
     ]),
     verdictEl,
-    resultsEl,
+    scenarioEl,
+    el("div", { style: "height:6px" }),
+    detailEl,
     el("div", { style: "height:10px" }),
     breakevenEl,
   ]));
@@ -449,8 +477,9 @@ function renderCalculator(root, data) {
     el("h2", {}, ["How to read this"]),
     el("div", { class: "hint", html: `
       <ul>
-        <li><b>Use ask prices</b>, not bids — you buy each side at its ask. The "Use live ask prices" button fills in the last collected snapshot (up to ~5 min old; the real book moves faster, so always confirm on Kalshi before ordering).</li>
-        <li>The opportunity usually appears in volatile moments when the two sides get quoted inconsistently, and it disappears fast.</li>
+        <li>Prices are entered as <b>%</b>, matching what Kalshi shows. A 45% YES price means each YES contract costs $0.45 and pays $1 if UP wins.</li>
+        <li><b>Use ask prices</b>, not bids — you buy each side at its ask. "Use live ask prices" fills the last collected snapshot (up to ~5 min old; the real book moves faster, so always confirm on Kalshi before ordering).</li>
+        <li>Staking <b>different amounts</b> on each side tilts your payout: more on the side you think is likelier raises that outcome's profit but lowers the other. The "Guaranteed (worst case)" tile shows what you keep if the less-favorable side wins.</li>
         <li>Both orders must actually fill at those prices for the math to hold — partial fills leave you directional.</li>
         <li>Fee formula is Kalshi's published 7% taker formula and may not match every market/promotion exactly.</li>
       </ul>` }),
@@ -476,22 +505,46 @@ function computeSignal(markets, threshold, minute, direction) {
   return { fired, won };
 }
 
+// Dollar-gap signal: was (btc - target) beyond +/- gap$ within the chosen
+// window (first N min or last N min), and did the market resolve that way?
+function computeDiffSignal(markets, gap, minute, windowMode, direction) {
+  let fired = 0, won = 0;
+  for (const m of markets) {
+    const tl = m.diff_timeline || [];
+    if (!tl.length) continue;
+    const inWindow = windowMode === "last"
+      ? tl.filter((pt) => pt[0] >= 15 - minute)
+      : tl.filter((pt) => pt[0] <= minute);
+    if (!inWindow.length) continue;
+    const hit = direction === "up"
+      ? inWindow.some((pt) => pt[1] >= gap)
+      : inWindow.some((pt) => pt[1] <= -gap);
+    if (!hit) continue;
+    fired++;
+    const wonIt = direction === "up" ? m.result === "yes" : m.result === "no";
+    if (wonIt) won++;
+  }
+  return { fired, won };
+}
+
 function renderInsights(root, data) {
   const markets = (data.insight_markets && data.insight_markets.length
     ? data.insight_markets
     : (data.recent_markets || []).map((r) => ({
-        close_time: r.close_time, result: r.result, volume: r.volume_max, timeline: r.prob_timeline || [],
+        close_time: r.close_time, result: r.result, volume: r.volume_max,
+        timeline: r.prob_timeline || [], diff_timeline: r.diff_timeline || [],
       }))
   ).filter((m) => m.result === "yes" || m.result === "no");
 
   const withTl = markets.filter((m) => (m.timeline || []).length >= 1);
+  const withDiff = markets.filter((m) => (m.diff_timeline || []).length >= 1);
   const sm = data.summary || {};
 
   root.appendChild(el("div", { class: "panel" }, [
     el("h2", {}, ["What is this?"]),
     el("div", { class: "desc" }, [
-      `Pattern statistics computed automatically from every market this tracker has recorded (${markets.length} settled so far, ${withTl.length} with sampled in-market odds). ` +
-      `Odds are sampled every ~5 minutes by the collector, so each 15-minute market has roughly 2–3 probability readings — patterns get sharper as more data accumulates.`,
+      `Pattern statistics computed automatically from every market this tracker has recorded (${markets.length} settled so far, ${withTl.length} with sampled in-market odds, ${withDiff.length} with BTC-vs-target gaps). ` +
+      `Odds and price are sampled every ~5 minutes by the collector, so each 15-minute market has roughly 2–3 readings — patterns get sharper as more data accumulates.`,
     ]),
   ]));
 
@@ -528,6 +581,53 @@ function renderInsights(root, data) {
     upResult,
     downResult,
   ]));
+
+  // --- price-gap explorer (BTC vs Kalshi target, in $) ---
+  const gapInput = el("input", { type: "range", min: "5", max: "150", step: "5", value: "80" });
+  const gapMinInput = el("input", { type: "range", min: "1", max: "14", step: "1", value: "6" });
+  const gapWindowSel = el("select", { class: "combo" });
+  gapWindowSel.appendChild(el("option", { value: "first" }, ["in the first N min"]));
+  gapWindowSel.appendChild(el("option", { value: "last" }, ["in the last N min"]));
+  const gapOut = el("output", {}, ["$80"]);
+  const gapMinOut = el("output", {}, ["6 min"]);
+  const gapUp = el("div", { class: "big-insight" });
+  const gapDown = el("div", { class: "big-insight" });
+
+  function refreshGap() {
+    const G = parseInt(gapInput.value, 10);
+    const M = parseInt(gapMinInput.value, 10);
+    const mode = gapWindowSel.value;
+    gapOut.textContent = "$" + G;
+    gapMinOut.textContent = M + " min";
+    const windowLabel = mode === "last" ? `in the last <b>${M} min</b>` : `within the first <b>${M} min</b>`;
+    const upSig = computeDiffSignal(withDiff, G, M, mode, "up");
+    const downSig = computeDiffSignal(withDiff, G, M, mode, "down");
+    gapUp.innerHTML = upSig.fired === 0
+      ? `No market yet had BTC ≥ <b>$${G}</b> above target ${windowLabel}.`
+      : `When BTC was <b>≥ $${G} above</b> the target ${windowLabel}, <span class="up"><b>UP won ${upSig.won} of ${upSig.fired}</b></span> (<b>${(upSig.won / upSig.fired * 100).toFixed(0)}%</b>).`;
+    gapDown.innerHTML = downSig.fired === 0
+      ? `No market yet had BTC ≥ <b>$${G}</b> below target ${windowLabel}.`
+      : `When BTC was <b>≥ $${G} below</b> the target ${windowLabel}, <span class="down"><b>DOWN won ${downSig.won} of ${downSig.fired}</b></span> (<b>${(downSig.won / downSig.fired * 100).toFixed(0)}%</b>).`;
+  }
+  gapInput.addEventListener("input", refreshGap);
+  gapMinInput.addEventListener("input", refreshGap);
+  gapWindowSel.addEventListener("change", refreshGap);
+
+  const gapPanel = el("div", { class: "panel" }, [
+    el("h2", {}, ["Price-Gap Explorer"]),
+    el("div", { class: "desc" }, ["How far BTC's spot price sat above/below the Kalshi target, and whether the market then resolved that way. e.g. “when BTC was $80 above target in the first 6 min, how often did UP win?”"]),
+    el("div", { class: "range-row" }, [el("label", {}, ["Gap from target ($)"]), gapInput, gapOut]),
+    el("div", { class: "range-row" }, [el("label", {}, ["Minutes"]), gapMinInput, gapMinOut]),
+    el("div", { class: "range-row" }, [el("label", {}, ["Window"]), gapWindowSel]),
+    gapUp,
+    gapDown,
+  ]);
+  if (withDiff.length === 0) {
+    gapPanel.appendChild(el("div", { class: "empty-state" }, [
+      "No BTC-vs-target gap data yet — this fills in as the collector records spot price alongside each market (needs runs from the updated collector).",
+    ]));
+  }
+  root.appendChild(gapPanel);
 
   // --- auto headline stats ---
   const stat = (arr, pred) => arr.filter(pred).length;
@@ -574,6 +674,7 @@ function renderInsights(root, data) {
   }
 
   refreshExplorer();
+  refreshGap();
 }
 
 // ---------- tabs ----------

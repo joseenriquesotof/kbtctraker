@@ -144,6 +144,8 @@ def build_market_records(snapshots: list[dict]) -> dict[str, dict]:
         # Only quotes taken while the market was live are meaningful --
         # settled markets quote 0/100 junk, which would pollute ranges.
         window: list[tuple[float, float]] = []
+        # (minute_into_window, btc_spot - strike) for the diff-based patterns.
+        diff_window: list[tuple[float, float]] = []
         for m in samples:
             t = _parse_ts(m.get("_ts"))
             p = yes_prob(m)
@@ -152,11 +154,18 @@ def build_market_records(snapshots: list[dict]) -> dict[str, dict]:
             if open_ts is not None and close_ts is not None and not (open_ts <= t < close_ts):
                 continue
             window.append((t, p))
+            spot = _num(m.get("_btc_spot_usd"))
+            if spot is not None and strike is not None and open_ts is not None:
+                diff_window.append((t, spot - float(strike)))
 
         prob_timeline = []
+        diff_timeline = []
         if open_ts is not None:
             prob_timeline = [
                 [round((t - open_ts) / 60, 1), round(p, 1)] for t, p in window
+            ]
+            diff_timeline = [
+                [round((t - open_ts) / 60, 1), round(d, 2)] for t, d in diff_window
             ]
 
         volumes = [_num(_first(m, "volume_fp", "volume")) for m in samples]
@@ -197,6 +206,7 @@ def build_market_records(snapshots: list[dict]) -> dict[str, dict]:
             "open_interest": _num(_first(last, "open_interest_fp", "open_interest")),
             "sample_count": len(samples),
             "prob_timeline": prob_timeline,
+            "diff_timeline": diff_timeline,
             "yes_leaning_seconds": yes_secs,
             "no_leaning_seconds": no_secs,
         }
@@ -329,6 +339,7 @@ def main() -> int:
             "result": r["result"],
             "volume": r["volume_max"],
             "timeline": r["prob_timeline"],
+            "diff_timeline": r["diff_timeline"],
         }
         for r in settled[:MAX_INSIGHT_MARKETS]
     ]

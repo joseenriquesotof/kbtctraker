@@ -311,7 +311,11 @@ footer a { color: var(--text-secondary); }
   margin-bottom: 12px;
 }
 .verdict.good { background: rgba(12, 163, 12, 0.12); color: var(--good); }
+.verdict.warn { background: rgba(250, 178, 25, 0.14); color: #a5750a; }
 .verdict.bad { background: rgba(208, 59, 59, 0.12); color: var(--critical); }
+@media (prefers-color-scheme: dark) {
+  .verdict.warn { color: #fab219; }
+}
 .hint {
   font-size: 12px;
   color: var(--text-muted);
@@ -337,6 +341,16 @@ footer a { color: var(--text-secondary); }
   font-weight: 600;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
+}
+.combo {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid var(--baseline);
+  border-radius: 8px;
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
 }
 .big-insight {
   font-size: 15px;

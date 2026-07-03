@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-03T17:59:36Z",
+  "generated_at": "2026-07-03T18:04:38Z",
   "series_ticker": "KXBTC15M",
   "current": {
     "ticker": "KXBTC15M-26JUL031400-00",
@@ -33,11 +33,21 @@
         0.1
       ]
     ],
+    "diff_timeline": [
+      [
+        5.2,
+        -33.23
+      ],
+      [
+        14.6,
+        -42.23
+      ]
+    ],
     "yes_leaning_seconds": 0.0,
     "no_leaning_seconds": 564.0,
     "btc_spot_usd": 62145.0,
     "distance_to_strike_pct": -0.06790783252446395,
-    "seconds_remaining": 23
+    "seconds_remaining": 0
   },
   "summary": {
     "total_markets_tracked": 45,
@@ -45,7 +55,7 @@
     "up_wins": 27,
     "down_wins": 17,
     "up_win_rate_pct": 61.36363636363637,
-    "avg_volume": 1026959.0561363637,
+    "avg_volume": 1026959.0561363638,
     "longest_streak": {
       "result": "yes",
       "length": 4
@@ -86,6 +96,12 @@
           78.5
         ]
       ],
+      "diff_timeline": [
+        [
+          7.1,
+          4.68
+        ]
+      ],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -112,6 +128,7 @@
       "open_interest": 338096.33,
       "sample_count": 3,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -141,6 +158,12 @@
         [
           6.3,
           92.7
+        ]
+      ],
+      "diff_timeline": [
+        [
+          6.3,
+          35.82
         ]
       ],
       "yes_leaning_seconds": 0.0,
@@ -174,6 +197,12 @@
           53.5
         ]
       ],
+      "diff_timeline": [
+        [
+          9.0,
+          -27.36
+        ]
+      ],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -200,6 +229,7 @@
       "open_interest": 347427.57,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -226,6 +256,7 @@
       "open_interest": 360198.85,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -252,6 +283,7 @@
       "open_interest": 326459.84,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -278,6 +310,7 @@
       "open_interest": 309549.76,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -304,6 +337,7 @@
       "open_interest": 344894.46,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -330,6 +364,7 @@
       "open_interest": 406840.2,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -356,6 +391,7 @@
       "open_interest": 462345.91,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -382,6 +418,7 @@
       "open_interest": 292618.65,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -408,6 +445,7 @@
       "open_interest": 271246.48,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -434,6 +472,7 @@
       "open_interest": 326413.04,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -460,6 +499,7 @@
       "open_interest": 449036.42,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -486,6 +526,7 @@
       "open_interest": 290925.99,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -512,6 +553,7 @@
       "open_interest": 252773.45,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -538,6 +580,7 @@
       "open_interest": 240610.11,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -564,6 +607,7 @@
       "open_interest": 282990.65,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -590,6 +634,7 @@
       "open_interest": 213955.25,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -616,6 +661,7 @@
       "open_interest": 215582.72,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -642,6 +688,7 @@
       "open_interest": 224275.94,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -668,6 +715,7 @@
       "open_interest": 261427.35,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -694,6 +742,7 @@
       "open_interest": 267091.41,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -720,6 +769,7 @@
       "open_interest": 248399.08,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -746,6 +796,7 @@
       "open_interest": 201224.4,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -772,6 +823,7 @@
       "open_interest": 184879.4,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -798,6 +850,7 @@
       "open_interest": 186874.09,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -824,6 +877,7 @@
       "open_interest": 236891.04,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -850,6 +904,7 @@
       "open_interest": 171655.65,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -876,6 +931,7 @@
       "open_interest": 159197.42,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -902,6 +958,7 @@
       "open_interest": 284217.01,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -928,6 +985,7 @@
       "open_interest": 273244.19,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -954,6 +1012,7 @@
       "open_interest": 212411.09,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -980,6 +1039,7 @@
       "open_interest": 232219.05,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -1006,6 +1066,7 @@
       "open_interest": 366724.89,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -1032,6 +1093,7 @@
       "open_interest": 254666.07,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -1058,6 +1120,7 @@
       "open_interest": 266278.3,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -1084,6 +1147,7 @@
       "open_interest": 265939.18,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -1110,6 +1174,7 @@
       "open_interest": 306253.74,
       "sample_count": 5,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -1136,6 +1201,7 @@
       "open_interest": 342538.39,
       "sample_count": 3,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -1162,6 +1228,7 @@
       "open_interest": 400962.75,
       "sample_count": 2,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -1188,6 +1255,7 @@
       "open_interest": 310915.99,
       "sample_count": 2,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     },
@@ -1214,6 +1282,7 @@
       "open_interest": 449720.57,
       "sample_count": 1,
       "prob_timeline": [],
+      "diff_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
     }
@@ -1228,13 +1297,20 @@
           7.1,
           78.5
         ]
+      ],
+      "diff_timeline": [
+        [
+          7.1,
+          4.68
+        ]
       ]
     },
     {
       "close_time": "2026-07-03T17:30:00Z",
       "result": "no",
       "volume": 1320142.65,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T17:15:00Z",
@@ -1244,6 +1320,12 @@
         [
           6.3,
           92.7
+        ]
+      ],
+      "diff_timeline": [
+        [
+          6.3,
+          35.82
         ]
       ]
     },
@@ -1256,247 +1338,293 @@
           9.0,
           53.5
         ]
+      ],
+      "diff_timeline": [
+        [
+          9.0,
+          -27.36
+        ]
       ]
     },
     {
       "close_time": "2026-07-03T16:45:00Z",
       "result": "no",
       "volume": 1440716.55,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T16:30:00Z",
       "result": "yes",
       "volume": 860736.23,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T16:15:00Z",
       "result": "yes",
       "volume": 1408166.4,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T16:00:00Z",
       "result": "yes",
       "volume": 1105995.64,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T15:45:00Z",
       "result": "no",
       "volume": 1214634.55,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T15:30:00Z",
       "result": "no",
       "volume": 891423.02,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T15:15:00Z",
       "result": "yes",
       "volume": 1214993.86,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T15:00:00Z",
       "result": "yes",
       "volume": 722665.81,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T14:45:00Z",
       "result": "yes",
       "volume": 986580.44,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T14:30:00Z",
       "result": "yes",
       "volume": 886067.06,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T14:15:00Z",
       "result": "no",
       "volume": 916228.5,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T14:00:00Z",
       "result": "no",
       "volume": 1457227.77,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T13:45:00Z",
       "result": "yes",
       "volume": 1361073.12,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T13:30:00Z",
       "result": "yes",
       "volume": 1150849.94,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T13:15:00Z",
       "result": "yes",
       "volume": 944967.25,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T13:00:00Z",
       "result": "yes",
       "volume": 644212.64,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T12:45:00Z",
       "result": "no",
       "volume": 979073.34,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T12:30:00Z",
       "result": "no",
       "volume": 684954.82,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T12:15:00Z",
       "result": "yes",
       "volume": 748505.82,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T12:00:00Z",
       "result": "yes",
       "volume": 609601.02,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T11:45:00Z",
       "result": "no",
       "volume": 617951.88,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T11:30:00Z",
       "result": "no",
       "volume": 1099941.87,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T11:15:00Z",
       "result": "yes",
       "volume": 816222.98,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T11:00:00Z",
       "result": "no",
       "volume": 735079.35,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T10:45:00Z",
       "result": "yes",
       "volume": 625036.25,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T10:30:00Z",
       "result": "yes",
       "volume": 880421.46,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T10:15:00Z",
       "result": "yes",
       "volume": 1172409.61,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T10:00:00Z",
       "result": "yes",
       "volume": 635610.62,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T09:45:00Z",
       "result": "no",
       "volume": 729107.69,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T09:30:00Z",
       "result": "no",
       "volume": 1161109.81,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T09:15:00Z",
       "result": "yes",
       "volume": 980230.74,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T09:00:00Z",
       "result": "no",
       "volume": 735130.47,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T08:45:00Z",
       "result": "yes",
       "volume": 1121832.08,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T08:30:00Z",
       "result": "yes",
       "volume": 1224887.11,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T08:15:00Z",
       "result": "no",
       "volume": 1494510.04,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T08:00:00Z",
       "result": "no",
       "volume": 1083149.59,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T07:45:00Z",
       "result": "yes",
       "volume": 1068191.79,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T07:30:00Z",
       "result": "yes",
       "volume": 1043379.2,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T07:15:00Z",
       "result": "no",
       "volume": 1665354.91,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     },
     {
       "close_time": "2026-07-03T07:00:00Z",
       "result": "yes",
       "volume": 1098158.4,
-      "timeline": []
+      "timeline": [],
+      "diff_timeline": []
     }
   ],
   "series": {
