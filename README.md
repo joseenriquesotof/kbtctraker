@@ -38,8 +38,8 @@ GitHub Actions (every 5 min)          docs/ (GitHub Pages)
   which is why it needs `contents: write` permission. Public repos get
   unlimited free Actions minutes, so the extra runner time is free.
 - **`docs/`** is a static, dependency-free HTML/JS dashboard (no build
-  step, no CDN) that reads `docs/data.json` and renders it. It's meant to
-  be served by GitHub Pages.
+  step, no CDN) that reads `docs/data.json`, renders it, and checks for a
+  fresher copy every minute. It's meant to be served by GitHub Pages.
 
 Why GitHub Actions and not a live server? Kalshi's API isn't reachable
 from every environment, and this setup needs zero infrastructure — no
@@ -78,12 +78,14 @@ whichever branch Vercel is tracking).
 - **Resolution**: GitHub Actions cron can only *launch* a run every 5
   minutes (and may lag under load), but each run loops internally to take
   a snapshot about every 2 minutes, so a 15-minute market gets roughly
-  6-7 readings. Good for seeing the shape of each window and building
-  long-run stats; still not a tick-by-tick trading feed. For tighter or
-  guaranteed timing, run the collector locally (see below) where you
-  control the interval down to seconds. To change the cadence, edit
-  `SAMPLES`/`INTERVAL` in `.github/workflows/collect.yml`, or trigger a
-  run manually with custom values via Actions → Run workflow.
+  6-8 readings. The dashboard checks for a fresher `data.json` every
+  minute, but the published data can still lag while Actions commits and
+  Pages/Vercel redeploys. Good for seeing the shape of each window and
+  building long-run stats; still not a tick-by-tick trading feed. For
+  tighter or guaranteed timing, run the collector locally (see below)
+  where you control the interval down to seconds. To change the cadence,
+  edit `SAMPLES`/`INTERVAL` in `.github/workflows/collect.yml`, or trigger
+  a run manually with custom values via Actions → Run workflow.
 - **Target/strike price**: shown as "Kalshi Target" — the BTC price the
   active contract settles against (Kalshi's `floor_strike`/`cap_strike`).
 - **YES probability**: the mid of Kalshi's live yes bid/ask, in %. This
