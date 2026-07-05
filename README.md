@@ -6,7 +6,7 @@ BTC volatility, win rate, streaks, and a history of settled markets — all
 saved over time so you can go back and learn from it.
 
 **Live dashboard:** once GitHub Pages is enabled (see setup below), it's
-published at `https://<your-username>.github.io/kbtctraker/`.
+published at `https://joseenriquesotof.github.io/kbtctraker/`.
 
 ## How it works
 
