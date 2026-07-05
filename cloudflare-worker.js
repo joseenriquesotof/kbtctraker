@@ -2,6 +2,7 @@ const SERIES_TICKER = "KXBTC15M";
 const KALSHI_BASE = "https://api.elections.kalshi.com/trade-api/v2";
 const COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd";
 const COINBASE_URL = "https://api.coinbase.com/v2/prices/BTC-USD/spot";
+const LEGACY_DATA_URL = "https://joseenriquesotof.github.io/kbtctraker/data.json";
 const DATA_KEY = "data.json";
 const MAX_POINTS = 288;
 
@@ -105,6 +106,15 @@ async function fetchBtcSpotUsd() {
   }
 }
 
+async function fetchLegacyData() {
+  try {
+    const data = await fetchJson(`${LEGACY_DATA_URL}?seed=${Date.now()}`);
+    return data && data.generated_at ? data : null;
+  } catch {
+    return null;
+  }
+}
+
 function marketRecord(market, nowIso, btcSpotUsd) {
   const openMs = parseTime(market.open_time);
   const closeMs = parseTime(market.close_time);
@@ -175,7 +185,13 @@ function updateSeries(previous, nowIso, current) {
 
 async function refresh(env) {
   const nowIso = isoNow();
-  const previous = await env.KBTC_DATA.get(DATA_KEY, "json").catch(() => null);
+  let previous = await env.KBTC_DATA.get(DATA_KEY, "json").catch(() => null);
+  if (!previous || !previous.recent_markets || previous.recent_markets.length < 20) {
+    const legacy = await fetchLegacyData();
+    if (legacy && (!previous || Date.parse(legacy.generated_at || 0) > Date.parse(previous.generated_at || 0))) {
+      previous = legacy;
+    }
+  }
   const [btcSpotUsd, openMarkets] = await Promise.all([
     fetchBtcSpotUsd(),
     fetchMarkets("open", 20),
@@ -184,9 +200,15 @@ async function refresh(env) {
 
   const currentMarket = chooseCurrent(openMarkets, nowIso);
   const current = currentMarket ? marketRecord(currentMarket, nowIso, btcSpotUsd) : null;
-  const recent = settledMarkets
-    ? settledMarkets.map((m) => marketRecord(m, nowIso, btcSpotUsd))
-    : (previous?.recent_markets || []);
+  const freshRecent = settledMarkets ? settledMarkets.map((m) => marketRecord(m, nowIso, btcSpotUsd)) : [];
+  const byTicker = new Map();
+  for (const market of freshRecent) byTicker.set(market.ticker, market);
+  for (const market of previous?.recent_markets || []) {
+    if (!byTicker.has(market.ticker)) byTicker.set(market.ticker, market);
+  }
+  const recent = Array.from(byTicker.values())
+    .sort((a, b) => Date.parse(b.close_time || 0) - Date.parse(a.close_time || 0))
+    .slice(0, 60);
   const upWins = recent.filter((m) => m.result === "yes").length;
   const downWins = recent.filter((m) => m.result === "no").length;
   const settledCount = upWins + downWins;
@@ -208,7 +230,7 @@ async function refresh(env) {
       pct_time_no_leaning: null,
     },
     recent_markets: recent,
-    insight_markets: recent.map((m) => ({
+    insight_markets: previous?.insight_markets || recent.map((m) => ({
       close_time: m.close_time,
       result: m.result,
       volume: m.volume_max,
