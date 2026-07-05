@@ -23,9 +23,14 @@ const DATA_KEY = "data.json";
 const MARKETS_KEY = "markets.json";
 
 const MAX_POINTS = 288;            // ~24h of series at 5-min cadence
-const MAX_RECENT_MARKETS = 60;
-const MAX_INSIGHT_MARKETS = 400;
-const MAX_TRACKED_MARKETS = 600;   // KV size guard
+const MAX_RECENT_MARKETS = 60;     // "recent settled" table only
+// Insights runs over EVERY settled market we still track -- there is no
+// separate insight cap. The tracked-market ceiling is the real limit: it bounds
+// both the KV value size (25 MB hard limit) and the data.json the browser
+// downloads each refresh. ~5000 markets is roughly 7 weeks of 15-min windows at
+// well under both limits. Raise it for deeper history (watch the payload) or
+// ask for the lazy-loaded insights endpoint if you want it truly unbounded.
+const MAX_TRACKED_MARKETS = 5000;
 const MAX_TIMELINE_POINTS = 64;    // a 15-min window at 2-min cadence is ~8
 const GAP_CAP_SECONDS = 900;       // cap time-weighting for any single gap
 const VOL_WINDOW = 12;             // rolling-volatility sample window
@@ -484,7 +489,8 @@ async function refresh(env) {
     .filter((r) => r.result === "yes" || r.result === "no")
     .sort((a, b) => (parseTime(b.close_time) || 0) - (parseTime(a.close_time) || 0));
   const recentMarkets = settled.slice(0, MAX_RECENT_MARKETS);
-  const insightMarkets = settled.slice(0, MAX_INSIGHT_MARKETS).map((r) => ({
+  // Every settled market we track feeds Insights, not just a recent slice.
+  const insightMarkets = settled.map((r) => ({
     ticker: r.ticker,
     open_time: r.open_time,
     close_time: r.close_time,
