@@ -702,16 +702,23 @@ function clearPanel(id) {
 }
 
 async function loadAndRender() {
-  clearPanel("tab-live");
-  clearPanel("tab-insights");
-  clearPanel("tab-calculator");
-
+  // Fetch BEFORE clearing: blanking the tabs first left the page empty for the
+  // whole fetch duration on every 60s refresh (a visible flicker, and the
+  // calculator vanished mid-typing).
   let data = null;
   try {
     const res = await fetch("data.json?ts=" + Date.now(), { cache: "no-store" });
     if (!res.ok) throw new Error(res.status);
     data = await res.json();
   } catch (e) {
+    data = null;
+  }
+
+  clearPanel("tab-live");
+  clearPanel("tab-insights");
+  clearPanel("tab-calculator");
+
+  if (!data) {
     document.getElementById("tab-live").appendChild(
       el("div", { class: "empty-state" }, [
         "data.json not found yet. Once the collector workflow runs at least once, this page will populate automatically.",

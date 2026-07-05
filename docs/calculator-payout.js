@@ -1,24 +1,50 @@
 (function () {
+  const STATE_KEY = "kbtc-calc-state";
+
   function fmtX(v, digits = 2) {
     if (v === null || v === undefined || Number.isNaN(v)) return "–";
     return v.toFixed(digits) + "x";
   }
 
+  // The whole tab is rebuilt from scratch on every data refresh (~60s), which
+  // used to wipe whatever the user had typed mid-analysis. Persist the inputs
+  // so a re-render restores them exactly.
+  function loadState() {
+    try {
+      return JSON.parse(localStorage.getItem(STATE_KEY)) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function persistState(state) {
+    try {
+      localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    } catch {
+      /* storage unavailable (private mode) -- inputs just won't survive */
+    }
+  }
+
   function renderCalculatorWithPayout(root, data) {
     const c = data && data.current;
+    const saved = loadState();
+    const sv = (key, fallback) =>
+      saved[key] !== undefined && saved[key] !== null && saved[key] !== "" ? String(saved[key]) : fallback;
 
-    const yesPriceInput = el("input", { type: "number", id: "calc-yes-p", min: "0.1", max: "99.9", step: "0.1", value: "45" });
-    const noPriceInput = el("input", { type: "number", id: "calc-no-p", min: "0.1", max: "99.9", step: "0.1", value: "38" });
-    const yesMoneyInput = el("input", { type: "number", id: "calc-yes-m", min: "0", step: "1", value: "200" });
-    const noMoneyInput = el("input", { type: "number", id: "calc-no-m", min: "0", step: "1", value: "200" });
+    const yesPriceInput = el("input", { type: "number", id: "calc-yes-p", min: "0.1", max: "99.9", step: "0.1", value: sv("yesP", "45") });
+    const noPriceInput = el("input", { type: "number", id: "calc-no-p", min: "0.1", max: "99.9", step: "0.1", value: sv("noP", "38") });
+    const yesMoneyInput = el("input", { type: "number", id: "calc-yes-m", min: "0", step: "1", value: sv("yesM", "200") });
+    const noMoneyInput = el("input", { type: "number", id: "calc-no-m", min: "0", step: "1", value: sv("noM", "200") });
     const feeCheck = el("input", { type: "checkbox", id: "calc-fees" });
-    feeCheck.checked = true;
+    feeCheck.checked = saved.fees !== false;
     const yesMultiplierCheck = el("input", { type: "checkbox", id: "calc-yes-x" });
     const noMultiplierCheck = el("input", { type: "checkbox", id: "calc-no-x" });
-    const yesMultiplierInput = el("input", { type: "number", id: "calc-yes-x-value", min: "1", step: "0.01", value: "2.22" });
-    const noMultiplierInput = el("input", { type: "number", id: "calc-no-x-value", min: "1", step: "0.01", value: "2.63" });
-    yesMultiplierInput.disabled = true;
-    noMultiplierInput.disabled = true;
+    yesMultiplierCheck.checked = saved.yesXOn === true;
+    noMultiplierCheck.checked = saved.noXOn === true;
+    const yesMultiplierInput = el("input", { type: "number", id: "calc-yes-x-value", min: "1", step: "0.01", value: sv("yesX", "2.22") });
+    const noMultiplierInput = el("input", { type: "number", id: "calc-no-x-value", min: "1", step: "0.01", value: sv("noX", "2.63") });
+    yesMultiplierInput.disabled = !yesMultiplierCheck.checked;
+    noMultiplierInput.disabled = !noMultiplierCheck.checked;
 
     const liveBtn = el("button", { class: "btn", type: "button" }, ["Use live ask prices"]);
     const liveYes = c && c.yes_ask_pct !== null && c.yes_ask_pct !== undefined ? c.yes_ask_pct : null;
@@ -38,10 +64,10 @@
     const outcomeDetailEl = el("div", { class: "outcome-detail" });
     const detailEl = el("div", { class: "tiles" });
     const breakevenEl = el("div", { class: "hint" });
-    let selectedOutcome = "up";
+    let selectedOutcome = saved.outcome === "down" ? "down" : "up";
 
-    const upOutcomeBtn = el("button", { class: "btn outcome active", type: "button" }, ["Show UP win"]);
-    const downOutcomeBtn = el("button", { class: "btn outcome", type: "button" }, ["Show DOWN win"]);
+    const upOutcomeBtn = el("button", { class: "btn outcome" + (selectedOutcome === "up" ? " active" : ""), type: "button" }, ["Show UP win"]);
+    const downOutcomeBtn = el("button", { class: "btn outcome" + (selectedOutcome === "down" ? " active" : ""), type: "button" }, ["Show DOWN win"]);
     const outcomeBtns = el("div", { class: "outcome-buttons" }, [upOutcomeBtn, downOutcomeBtn]);
 
     function sideMath(money, pricePct, useMultiplier, multiplier) {
@@ -62,6 +88,19 @@
     }
 
     function recompute() {
+      persistState({
+        yesP: yesPriceInput.value,
+        noP: noPriceInput.value,
+        yesM: yesMoneyInput.value,
+        noM: noMoneyInput.value,
+        yesX: yesMultiplierInput.value,
+        noX: noMultiplierInput.value,
+        yesXOn: yesMultiplierCheck.checked,
+        noXOn: noMultiplierCheck.checked,
+        fees: feeCheck.checked,
+        outcome: selectedOutcome,
+      });
+
       const yesP = parseFloat(yesPriceInput.value);
       const noP = parseFloat(noPriceInput.value);
       const yesMoney = Math.max(0, parseFloat(yesMoneyInput.value) || 0);
@@ -189,21 +228,9 @@
     recompute();
   }
 
-  async function rerenderCalculator() {
-    const root = document.getElementById("tab-calculator");
-    if (!root) return;
-    let data = null;
-    try {
-      const res = await fetch("data.json?ts=" + Date.now(), { cache: "no-store" });
-      if (res.ok) data = await res.json();
-    } catch (e) {
-      data = null;
-    }
-    root.replaceChildren();
-    renderCalculatorWithPayout(root, data);
-  }
-
+  // Replace app.js's basic calculator: loadAndRender() resolves this name at
+  // call time, so every one of its ~60s refreshes renders this version with
+  // fresh data. No second refresh loop needed here -- one used to run in this
+  // file too, and the double rebuild wiped user input twice a minute.
   window.renderCalculator = renderCalculatorWithPayout;
-  setTimeout(rerenderCalculator, 250);
-  setInterval(() => setTimeout(rerenderCalculator, 500), 60 * 1000);
 })();
