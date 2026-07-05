@@ -26,5 +26,16 @@
   </footer>
 </div>
 <div class="tooltip" id="tooltip"></div>
+<script>
+  window.KBTC_DATA_URL = "https://kbtctrackw.jose-soto8.workers.dev/";
+  window.fetch = ((nativeFetch) => (input, init) => {
+    const url = typeof input === "string" ? input : input && input.url;
+    if (url && /^data\.json(\?|$)/.test(url)) {
+      const query = url.includes("?") ? url.slice(url.indexOf("?")) : "";
+      return nativeFetch(window.KBTC_DATA_URL + query, init);
+    }
+    return nativeFetch(input, init);
+  })(window.fetch.bind(window));
+</script>
 <script src="app.js"></script>
 <script src="calculator-payout.js"></script>
