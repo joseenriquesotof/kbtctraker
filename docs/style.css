@@ -424,3 +424,37 @@ footer a { color: var(--text-secondary); }
     grid-template-columns: 1fr;
   }
 }
+
+/* --- export --- */
+.export-specific { margin: 4px 0 12px; }
+.export-multiselect {
+  width: 100%;
+  flex: none;
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.export-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 4px 0 10px;
+}
+.export-status {
+  margin: 6px 0 10px;
+  font-variant-numeric: tabular-nums;
+}
+.export-preview {
+  width: 100%;
+  min-height: 320px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid var(--baseline);
+  border-radius: 8px;
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre;
+  overflow: auto;
+}
