@@ -94,11 +94,32 @@ whichever branch Vercel is tracking).
 - **Volatility**: rolling standard deviation of BTC's 5-minute log
   returns, in %, from the CoinGecko price feed (independent of Kalshi's
   own settlement index, so it's an approximation).
+- **Live-only quotes**: once a market settles, Kalshi keeps returning it
+  (status `finalized`) with top-of-book quoted as `0.00`/`1.00`, and it's
+  re-seen far more often than it was ever live. `aggregate.py` therefore
+  derives bid/ask (and all timelines) from the last sample seen while the
+  market was inside its `open`→`close` window, never from the trailing
+  finalized snapshot — so `yes_bid_pct`/`yes_ask_pct`/`no_bid_pct`/`no_ask_pct`
+  are real quotes, or `null` if a market was never caught live (rather than
+  misleading 0/100).
+- **Per-market timelines**: each settled market carries `prob_timeline`
+  (YES %), `diff_timeline` (BTC − target, $), `btc_timeline` (raw BTC
+  spot, $), `volume_timeline`, and `open_interest_timeline`. Every entry is
+  `[minutes_since_open, value, absolute_utc_timestamp]`, so a sample can be
+  cross-referenced to wall-clock events independent of the market's own open
+  time, and intra-window volume/OI changes are visible (not just the final
+  number).
+- **Collection log**: every poll attempt appends one line to
+  `data/raw/collection-log-YYYY-MM.jsonl` (timestamp, BTC ok/price, per-status
+  fetch success/count/error, markets written, tickers). This is how you tell a
+  missed run from a Kalshi rate-limit/error from a genuinely empty market. It's
+  a new append-only sidecar and never touches the raw snapshots.
 - **Robustness**: `collect.py` stores each Kalshi market object almost
   verbatim (JSON Lines), and `aggregate.py` is the only place that
-  interprets field names — trying several candidate keys defensively.
-  If Kalshi changes a field name, historical raw data is unaffected; only
-  the aggregation logic needs a fix.
+  interprets field names — trying several candidate keys defensively
+  (e.g. `yes_bid_dollars`→`yes_bid`, `open_interest_fp`→`open_interest`,
+  `volume_fp`→`volume`). If Kalshi changes a field name, historical raw data
+  is unaffected; only the aggregation logic needs a fix.
 - **Storage growth**: raw snapshots are partitioned into one file per
   month (`data/raw/snapshots-YYYY-MM.jsonl`) so individual files and git
   diffs stay manageable.

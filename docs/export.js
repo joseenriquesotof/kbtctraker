@@ -58,8 +58,14 @@
       yes_leaning_seconds: m.yes_leaning_seconds ?? null,
       no_leaning_seconds: m.no_leaning_seconds ?? null,
       sample_count: m.sample_count ?? timeline.length,
+      live_sample_count: m.live_sample_count ?? null,
+      // Timelines share [minutes_elapsed, value, utc_timestamp]. btc / volume /
+      // open-interest timelines are only present on newer aggregated records.
       prob_timeline: timeline,
       diff_timeline: m.diff_timeline || [],
+      btc_timeline: m.btc_timeline || [],
+      volume_timeline: m.volume_timeline || [],
+      open_interest_timeline: m.open_interest_timeline || [],
     };
   }
 
@@ -87,7 +93,7 @@
       "ticker", "title", "open_time", "close_time", "strike", "result", "volume",
       "open_interest", "yes_prob_first", "yes_prob_last", "yes_prob_min", "yes_prob_max",
       "yes_bid_pct", "yes_ask_pct", "no_bid_pct", "no_ask_pct",
-      "yes_leaning_seconds", "no_leaning_seconds", "sample_count",
+      "yes_leaning_seconds", "no_leaning_seconds", "sample_count", "live_sample_count",
     ];
     const lines = [cols.join(",")];
     for (const m of markets) lines.push(cols.map((c) => csvCell(m[c])).join(","));

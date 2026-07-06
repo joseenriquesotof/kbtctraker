@@ -120,6 +120,17 @@ def is_live_status(status) -> bool:
     return (status or "").lower() in ("active", "open")
 
 
+DEFAULT_TITLE = "BTC price up in next 15 mins?"
+
+
+def _volume_of(m: dict) -> float | None:
+    return _num(_first(m, "volume_fp", "volume"))
+
+
+def _open_interest_of(m: dict) -> float | None:
+    return _num(_first(m, "open_interest_fp", "open_interest"))
+
+
 def build_market_records(snapshots: list[dict]) -> dict[str, dict]:
     by_ticker: dict[str, list[dict]] = {}
     for s in snapshots:
@@ -140,36 +151,71 @@ def build_market_records(snapshots: list[dict]) -> dict[str, dict]:
             strike = strike_of(m)
             if strike is not None:
                 break
+        strike_f = _num(strike)
 
-        # Only quotes taken while the market was live are meaningful --
-        # settled markets quote 0/100 junk, which would pollute ranges.
-        window: list[tuple[float, float]] = []
-        # (minute_into_window, btc_spot - strike) for the diff-based patterns.
-        diff_window: list[tuple[float, float]] = []
+        # Only samples taken while the market was live are meaningful -- once a
+        # market settles Kalshi keeps returning it (status finalized) with
+        # top-of-book quoted as 0.00/1.00 junk, and it's re-seen far more often
+        # than it was live. Restricting to the open<=t<close window is what
+        # keeps bid/ask, probabilities and the timelines real rather than 0/100.
+        live: list[tuple[float, dict]] = []
         for m in samples:
             t = _parse_ts(m.get("_ts"))
-            p = yes_prob(m)
-            if t is None or p is None:
+            if t is None:
                 continue
             if open_ts is not None and close_ts is not None and not (open_ts <= t < close_ts):
                 continue
-            window.append((t, p))
+            live.append((t, m))
+
+        def minute_of(t: float):
+            return round((t - open_ts) / 60, 1) if open_ts is not None else None
+
+        # Every per-market timeline shares the same shape:
+        #   [minutes_elapsed_since_open, value, absolute_utc_timestamp]
+        # so a sample can be cross-referenced to wall-clock events regardless of
+        # the market's own open time.
+        prob_timeline: list = []
+        diff_timeline: list = []
+        btc_timeline: list = []
+        volume_timeline: list = []
+        open_interest_timeline: list = []
+        window: list[tuple[float, float]] = []  # (t, prob) for leaning math
+        for t, m in live:
+            ts_iso = m.get("_ts")
+            mn = minute_of(t)
+            if mn is None:
+                continue
+            p = yes_prob(m)
+            if p is not None:
+                prob_timeline.append([mn, round(p, 1), ts_iso])
+                window.append((t, p))
             spot = _num(m.get("_btc_spot_usd"))
-            if spot is not None and strike is not None and open_ts is not None:
-                diff_window.append((t, spot - float(strike)))
+            if spot is not None:
+                btc_timeline.append([mn, round(spot, 2), ts_iso])
+                if strike_f is not None:
+                    diff_timeline.append([mn, round(spot - strike_f, 2), ts_iso])
+            vol = _volume_of(m)
+            if vol is not None:
+                volume_timeline.append([mn, round(vol, 2), ts_iso])
+            oi = _open_interest_of(m)
+            if oi is not None:
+                open_interest_timeline.append([mn, round(oi, 2), ts_iso])
 
-        prob_timeline = []
-        diff_timeline = []
-        if open_ts is not None:
-            prob_timeline = [
-                [round((t - open_ts) / 60, 1), round(p, 1)] for t, p in window
-            ]
-            diff_timeline = [
-                [round((t - open_ts) / 60, 1), round(d, 2)] for t, d in diff_window
-            ]
+        # Scalar "closing live" fields come from the last sample seen while the
+        # market was live -- NOT samples[-1], which is almost always a
+        # post-settlement finalized quote (0/100, junk bid/ask).
+        last_live = live[-1][1] if live else None
 
-        volumes = [_num(_first(m, "volume_fp", "volume")) for m in samples]
-        volumes = [v for v in volumes if v is not None]
+        # open_interest / volume are cumulative and present on every snapshot
+        # (including finalized), so fall back to the last raw sample when the
+        # market was never caught live rather than dropping the field.
+        open_interest = None
+        if last_live is not None:
+            open_interest = _open_interest_of(last_live)
+        if open_interest is None:
+            open_interest = _open_interest_of(last)
+
+        volumes = [v for v in (_volume_of(m) for m in samples) if v is not None]
 
         # time-weighted seconds leaning yes(>=50) vs no(<50)
         yes_secs = 0.0
@@ -183,11 +229,13 @@ def build_market_records(snapshots: list[dict]) -> dict[str, dict]:
             else:
                 no_secs += dt
 
+        title = _first(last, "title", "subtitle", "yes_sub_title") or DEFAULT_TITLE
+
         records[ticker] = {
             "ticker": ticker,
             "event_ticker": last.get("event_ticker"),
-            "title": _first(last, "title", "subtitle", "yes_sub_title"),
-            "strike": _num(strike),
+            "title": title,
+            "strike": strike_f,
             "open_time": _first(last, "open_time"),
             "close_time": _first(last, "close_time"),
             "status": _first(last, "status"),
@@ -198,15 +246,19 @@ def build_market_records(snapshots: list[dict]) -> dict[str, dict]:
             "yes_prob_last": round(window[-1][1], 1) if window else None,
             "yes_prob_min": round(min(p for _, p in window), 1) if window else None,
             "yes_prob_max": round(max(p for _, p in window), 1) if window else None,
-            "yes_bid_pct": _pct_field(last, "yes_bid_dollars", "yes_bid"),
-            "yes_ask_pct": _pct_field(last, "yes_ask_dollars", "yes_ask"),
-            "no_bid_pct": _pct_field(last, "no_bid_dollars", "no_bid"),
-            "no_ask_pct": _pct_field(last, "no_ask_dollars", "no_ask"),
+            "yes_bid_pct": _pct_field(last_live, "yes_bid_dollars", "yes_bid") if last_live else None,
+            "yes_ask_pct": _pct_field(last_live, "yes_ask_dollars", "yes_ask") if last_live else None,
+            "no_bid_pct": _pct_field(last_live, "no_bid_dollars", "no_bid") if last_live else None,
+            "no_ask_pct": _pct_field(last_live, "no_ask_dollars", "no_ask") if last_live else None,
             "volume_max": max(volumes) if volumes else None,
-            "open_interest": _num(_first(last, "open_interest_fp", "open_interest")),
+            "open_interest": open_interest,
             "sample_count": len(samples),
+            "live_sample_count": len(live),
             "prob_timeline": prob_timeline,
             "diff_timeline": diff_timeline,
+            "btc_timeline": btc_timeline,
+            "volume_timeline": volume_timeline,
+            "open_interest_timeline": open_interest_timeline,
             "yes_leaning_seconds": yes_secs,
             "no_leaning_seconds": no_secs,
         }
@@ -332,14 +384,24 @@ def main() -> int:
     settled.sort(key=lambda r: _parse_ts(r.get("close_time")) or 0, reverse=True)
     recent_markets = settled[:MAX_RECENT_MARKETS]
 
-    # Slim per-market records for the Insights tab (more history, fewer fields).
+    # Per-market records for the Insights tab (more history than recent_markets).
+    # Carries the same timelines + title/open_interest as the full records so an
+    # export of any market -- not just the newest 60 -- is complete.
     insight_markets = [
         {
+            "ticker": r["ticker"],
+            "title": r["title"],
+            "open_time": r["open_time"],
             "close_time": r["close_time"],
+            "strike": r["strike"],
             "result": r["result"],
             "volume": r["volume_max"],
+            "open_interest": r["open_interest"],
             "timeline": r["prob_timeline"],
             "diff_timeline": r["diff_timeline"],
+            "btc_timeline": r["btc_timeline"],
+            "volume_timeline": r["volume_timeline"],
+            "open_interest_timeline": r["open_interest_timeline"],
         }
         for r in settled[:MAX_INSIGHT_MARKETS]
     ]
