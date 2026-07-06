@@ -679,14 +679,20 @@ function renderInsights(root, data) {
 }
 
 // ---------- tabs ----------
-const TABS = ["live", "insights", "calculator"];
+// Tab names are read from the DOM so self-contained tabs (compare, export) are
+// covered automatically, and activateTab is authoritative over EVERY panel --
+// switching away from any tab hides it, with no hardcoded list to keep in sync.
+const DEFAULT_TAB = "live";
+function tabNames() {
+  return Array.from(document.querySelectorAll(".tab")).map((b) => b.dataset.tab);
+}
 function currentTab() {
   const h = location.hash.replace("#", "");
-  return TABS.includes(h) ? h : "live";
+  return tabNames().includes(h) ? h : DEFAULT_TAB;
 }
 function activateTab(name) {
   document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b.dataset.tab === name));
-  TABS.forEach((t) => { document.getElementById("tab-" + t).hidden = t !== name; });
+  document.querySelectorAll(".tab-panel").forEach((p) => { p.hidden = p.id !== "tab-" + name; });
 }
 function initTabs() {
   document.querySelectorAll(".tab").forEach((b) => {
