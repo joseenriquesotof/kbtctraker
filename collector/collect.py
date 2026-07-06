@@ -34,6 +34,10 @@ def btc_price_path() -> str:
     return os.path.join(RAW_DIR, "btc_price.csv")
 
 
+def collection_log_path(ts: datetime) -> str:
+    return os.path.join(RAW_DIR, f"collection-log-{ts.strftime('%Y-%m')}.jsonl")
+
+
 def append_btc_price(ts_iso: str, price: float | None) -> None:
     path = btc_price_path()
     is_new = not os.path.exists(path)
@@ -41,6 +45,14 @@ def append_btc_price(ts_iso: str, price: float | None) -> None:
         if is_new:
             f.write("ts_utc,btc_usd\n")
         f.write(f"{ts_iso},{price if price is not None else ''}\n")
+
+
+def append_collection_log(ts: datetime, entry: dict) -> None:
+    """Append one poll-attempt record so gaps can be diagnosed later: was it a
+    missed run, a Kalshi error/rate-limit, or a genuinely empty market? This is
+    a new append-only sidecar file -- it never touches the raw snapshots."""
+    with open(collection_log_path(ts), "a") as f:
+        f.write(json.dumps(entry, separators=(",", ":")) + "\n")
 
 
 def main() -> int:
@@ -53,20 +65,28 @@ def main() -> int:
 
     errors = []
     markets_by_ticker: dict[str, dict] = {}
+    fetches: dict[str, dict] = {}
 
-    try:
-        for m in fetch_markets(SERIES_TICKER, status="open", limit=40):
-            m["_source_status_query"] = "open"
-            markets_by_ticker[m.get("ticker", id(m))] = m
-    except RuntimeError as exc:
-        errors.append(f"open markets fetch failed: {exc}")
+    def run_fetch(status_query: str, primary: bool) -> None:
+        result = {"ok": False, "count": 0, "error": None}
+        try:
+            batch = fetch_markets(SERIES_TICKER, status=status_query, limit=40)
+            result["ok"] = True
+            result["count"] = len(batch)
+            for m in batch:
+                if primary:
+                    m["_source_status_query"] = status_query
+                    markets_by_ticker[m.get("ticker", id(m))] = m
+                else:
+                    m.setdefault("_source_status_query", status_query)
+                    markets_by_ticker.setdefault(m.get("ticker", id(m)), m)
+        except RuntimeError as exc:
+            result["error"] = str(exc)
+            errors.append(f"{status_query} markets fetch failed: {exc}")
+        fetches[status_query] = result
 
-    try:
-        for m in fetch_markets(SERIES_TICKER, status="settled", limit=40):
-            m.setdefault("_source_status_query", "settled")
-            markets_by_ticker.setdefault(m.get("ticker", id(m)), m)
-    except RuntimeError as exc:
-        errors.append(f"settled markets fetch failed: {exc}")
+    run_fetch("open", primary=True)
+    run_fetch("settled", primary=False)
 
     out_path = snapshot_path(now)
     written = 0
@@ -76,6 +96,17 @@ def main() -> int:
             m["_btc_spot_usd"] = btc_price
             f.write(json.dumps(m, separators=(",", ":")) + "\n")
             written += 1
+
+    tickers = sorted(t for t in markets_by_ticker if isinstance(t, str))
+    append_collection_log(now, {
+        "_ts": ts_iso,
+        "btc_price": btc_price,
+        "btc_ok": btc_price is not None,
+        "fetches": fetches,
+        "markets_written": written,
+        "tickers": tickers,
+        "errors": errors,
+    })
 
     print(f"[{ts_iso}] btc=${btc_price} markets_written={written} file={out_path}")
     for err in errors:
