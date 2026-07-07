@@ -214,8 +214,9 @@ function legend(items) {
   ));
 }
 
-function tile(label, value, sub = "", cls = "") {
-  return el("div", { class: "tile" }, [
+function tile(label, value, sub = "", cls = "", titleAttr = "") {
+  const attrs = titleAttr ? { class: "tile", title: titleAttr } : { class: "tile" };
+  return el("div", attrs, [
     el("div", { class: "label" }, [label]),
     el("div", { class: `value ${cls}` }, [value]),
     sub ? el("div", { class: "sub" }, [sub]) : el("span"),
@@ -649,10 +650,14 @@ function computeGoldenRuleV2(markets) {
       triggerMinute: triggerPt[0], triggerValue: triggerPt[1],
       windowSampleCount: win.length,
       closingRatio: null, signFlipInWindow: false,
+      finalValue: null, dollarShrink: null, pctRetained: null,
     };
 
     if (tier === "confirmed" || tier === "single_reading") {
+      rec.finalValue = dtl.length ? dtl[dtl.length - 1][1] : null;
       rec.closingRatio = closingRatioFrom(win[0][1], dtl);
+      if (rec.closingRatio !== null) rec.pctRetained = rec.closingRatio * 100;
+      if (rec.finalValue !== null) rec.dollarShrink = win[0][1] - rec.finalValue;
       const firstSign = Math.sign(win[0][1]);
       rec.signFlipInWindow = win.some((pt) => Math.sign(pt[1]) !== 0 && Math.sign(pt[1]) !== firstSign);
     }
@@ -705,42 +710,78 @@ function goldenRuleV2Panel(withDiff) {
     return panel;
   }
 
-  // --- v1 vs v2 side by side ---
+  // --- v1 vs v2 vs combined, side by side ---
+  // v2Qualifying is always a subset of v1 (confirmed/single-reading both require
+  // at least one in-window sample >=$50, which alone satisfies v1's own "any
+  // qualifying sample" rule) -- so the deduped union can, in general, still pick
+  // up "rejected" markets that separately happen to have a v1-qualifying sample.
+  // Computed as a real dedup (not assumed equal to v1) so this stays correct if
+  // either rule's definition changes later.
+  const combinedByKey = new Map();
+  for (const x of v1) combinedByKey.set(marketKey(x.m), x);
+  for (const x of v2Qualifying) if (!combinedByKey.has(marketKey(x.m))) combinedByKey.set(marketKey(x.m), x);
+  const combined = Array.from(combinedByKey.values());
+  const combinedCorrect = combined.filter((x) => x.correct).length;
+
   panel.appendChild(el("div", { class: "tiles" }, [
     tile("v1 qualifying", String(v1.length), "any single ≥$50 sample"),
     tile("v1 accuracy", v1.length ? fmtPct(v1Correct / v1.length * 100, 1) : "–", `${v1Correct} correct of ${v1.length}`),
     tile("v2 qualifying", String(v2Qualifying.length), "confirmed + single-reading"),
     tile("v2 accuracy", v2Qualifying.length ? fmtPct(v2Correct / v2Qualifying.length * 100, 1) : "–", `${v2Correct} correct of ${v2Qualifying.length}`),
+    tile("v1 + v2 combined", String(combined.length), "deduped — same market counted once", "", "Union of v1's qualifying markets and v2's confirmed+single-reading markets, deduped by market. Since v2's qualifying pool is always contained in v1's, this number is currently identical to v1's own count."),
+    tile("Combined accuracy", combined.length ? fmtPct(combinedCorrect / combined.length * 100, 1) : "–", `${combinedCorrect} correct of ${combined.length}`),
   ]));
 
   // --- per-tier breakdown ---
-  const tierRow = (label, list, note) => {
+  const tierRow = (label, list, note, titleAttr) => {
     const c = list.filter((x) => x.correct).length;
-    return tile(label, String(list.length), list.length ? `${fmtPct(c / list.length * 100, 0)} accurate — ${note}` : note);
+    return tile(label, String(list.length), list.length ? `${fmtPct(c / list.length * 100, 0)} accurate — ${note}` : note, "", titleAttr);
   };
   panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["v2 by tier"]));
   panel.appendChild(el("div", { class: "tiles" }, [
     tierRow("Confirmed", v2.confirmed, "high confidence"),
     tierRow("Single-reading", v2.single_reading, "polling gap, not a weak signal"),
-    tierRow("Rejected", v2.rejected, "excluded from qualifying — shown for reference only"),
+    tierRow(
+      "Rejected", v2.rejected, "a real reversal, not a data gap",
+      "The gap reached $50+ at some point in the final 3 minutes, but a later reading in that same window showed it had dropped back below $50 (or flipped direction) — the signal didn't hold, so no bet would have been placed. Excluded from v2's qualifying pool."
+    ),
   ]));
   panel.appendChild(el("div", { class: "hint" }, [
-    "Single-reading markets are lower-confidence only because a ~2-minute poll may have missed a confirming second sample in the 3-minute window — the trigger itself is just as real as a confirmed one.",
+    el("b", {}, ["Single-reading"]), " markets are lower-confidence only because a ~2-minute poll may have missed a confirming second sample in the 3-minute window — the trigger itself is just as real as a confirmed one. ",
+    el("b", {}, ["Rejected"]), " markets are the opposite: the window was sampled well enough (2+ readings), and the gap genuinely failed to hold through to close — a real reversal signal, not a missed reading.",
   ]));
 
-  // --- closing_ratio: v1 vs v2 ---
-  const v1Ratios = v1.map((x) => closingRatioFrom(windowSamplesOf(x.m)[0]?.[1], x.m.diff_timeline || []));
+  // --- closing_ratio: v1 vs v2, plus $ / % framing for v2 ---
+  // v1's own trigger is the first sample in the window that ITSELF qualifies
+  // (abs>=50) -- not just the first window sample, which for a market v1 only
+  // counts via a later sample (e.g. a "rejected"-tier window like [30, 80])
+  // could be under $50 and would misrepresent the trigger.
+  function v1TriggerAndFinal(m) {
+    const late = (m.diff_timeline || []).filter((pt) => pt[0] >= 12 && Math.abs(pt[1]) >= 50);
+    if (!late.length) return [null, null];
+    const dtl = m.diff_timeline || [];
+    return [late[0][1], dtl.length ? dtl[dtl.length - 1][1] : null];
+  }
+  const v1TF = v1.map((x) => v1TriggerAndFinal(x.m));
+  const v1Ratios = v1TF.map(([trig, fin]) => (trig && fin !== null ? fin / trig : null));
   const v2Ratios = v2Qualifying.map((x) => x.closingRatio);
   const v1Cr = crStats(v1Ratios);
   const v2Cr = crStats(v2Ratios);
+  const shrinks = v2Qualifying.map((x) => x.dollarShrink).filter((v) => v !== null && v !== undefined && Number.isFinite(v));
+  const retained = v2Qualifying.map((x) => x.pctRetained).filter((v) => v !== null && v !== undefined && Number.isFinite(v));
+  const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null);
+  const avgShrink = avg(shrinks);
+  const avgRetained = avg(retained);
 
   panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Closing ratio — how much the gap held (v1 vs. v2)"]));
   panel.appendChild(el("div", { class: "desc" }, [
-    "closing_ratio = (last diff_timeline sample) ÷ (the sample that first triggered the rule). Below 1.0 means the gap shrank before close; below " + CR_FLAG_MAX + " (⚠) is flagged as a weak finish.",
+    "closing_ratio = (last diff_timeline sample) ÷ (the sample that first triggered the rule) — i.e. % of the gap still there by close. Below 1.0 means the gap shrank before close; below " + CR_FLAG_MAX + " (⚠) is flagged as a weak finish.",
   ]));
   panel.appendChild(el("div", { class: "tiles" }, [
     tile("v1 avg closing ratio", v1Cr.avg === null ? "–" : v1Cr.avg.toFixed(2) + "×", `${v1Cr.n} markets`),
     tile("v2 avg closing ratio", v2Cr.avg === null ? "–" : v2Cr.avg.toFixed(2) + "×", `${v2Cr.n} markets`),
+    tile("v2 avg $ shrink", avgShrink === null ? "–" : fmtUsd(avgShrink, 0), "confirmed + single-reading"),
+    tile("v2 avg % of gap retained", avgRetained === null ? "–" : fmtPct(avgRetained, 0), "confirmed + single-reading"),
   ]));
 
   const crTable = el("table", { class: "data" });
@@ -754,45 +795,56 @@ function goldenRuleV2Panel(withDiff) {
   crTable.appendChild(crBody);
   panel.appendChild(el("div", { class: "table-scroll" }, [crTable]));
 
-  // --- worst case ever (lowest closing_ratio across both versions) ---
+  // --- worst cases: last 24h top-3, plus the all-time worst as a footnote ---
+  // trigger/final are stored directly on the tagged entry (not nested under
+  // .x) so v1 and v2 entries -- whose underlying records have different
+  // field names -- render through one uniform path.
   const tagged = [
-    ...v1.map((x, i) => ({ x, ratio: v1Ratios[i], version: "v1" })),
-    ...v2Qualifying.map((x) => ({ x, ratio: x.closingRatio, version: `v2 (${x.tier.replace("_", "-")})` })),
+    ...v1.map((x, i) => ({ x, ratio: v1Ratios[i], version: "v1", trigger: v1TF[i][0], final: v1TF[i][1] })),
+    ...v2Qualifying.map((x) => ({ x, ratio: x.closingRatio, version: `v2 (${x.tier.replace("_", "-")})`, trigger: x.triggerValue, final: x.finalValue })),
   ].filter((t) => t.ratio !== null && t.ratio !== undefined && Number.isFinite(t.ratio));
-  if (tagged.length) {
-    const worst = tagged.reduce((a, b) => (b.ratio < a.ratio ? b : a));
-    panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Worst case ever recorded"]));
-    panel.appendChild(el("div", { class: "big-insight" + (worst.ratio < CR_FLAG_MAX ? " down" : "") }, [
-      `${fmtTime(worst.x.m.close_time)} · `,
-      el("b", {}, [worst.version]),
-      ` predicted ${worst.x.predicted === "yes" ? "UP" : "DOWN"}, market settled ${worst.x.result === "yes" ? "UP" : "DOWN"} · closing ratio `,
-      el("b", {}, [worst.ratio.toFixed(2) + "×"]),
-      ` — the gap shrank to ${worst.ratio < 0 ? "the opposite sign" : Math.round(worst.ratio * 100) + "% of its trigger value"} by the last available reading.`,
-    ]));
-  }
 
-  // --- v2 detail table ---
-  const allV2 = [...v2.confirmed, ...v2.single_reading, ...v2.rejected]
-    .sort((a, b) => (Date.parse(b.m.close_time || 0) || 0) - (Date.parse(a.m.close_time || 0) || 0));
-  const detailTable = el("table", { class: "data" });
-  detailTable.innerHTML = "<thead><tr><th>Closed</th><th>Tier</th><th>Predicted</th><th>Result</th><th>Closing ratio</th><th>Sign flip in window</th></tr></thead>";
-  const detailBody = el("tbody");
-  allV2.forEach((x) => {
-    const tr = el("tr");
-    if (x.closingRatio !== null && x.closingRatio < CR_FLAG_MAX) tr.className = "cr-flagged-row";
-    const tierBadge = x.tier === "confirmed" ? '<span class="up">confirmed</span>'
-      : x.tier === "single_reading" ? '<span class="badge unknown">single-reading</span>'
-      : '<span class="down">rejected</span>';
-    tr.innerHTML =
-      `<td>${fmtTime(x.m.close_time)}</td><td>${tierBadge}</td>` +
-      `<td>${x.predicted === "yes" ? "UP" : "DOWN"}</td><td>${resultBadge(x.result)}</td>` +
-      `<td>${x.closingRatio === null ? "–" : x.closingRatio.toFixed(2) + "×" + (x.closingRatio < CR_FLAG_MAX ? " ⚠" : "")}</td>` +
-      `<td>${x.tier === "rejected" ? "–" : (x.signFlipInWindow ? "yes" : "no")}</td>`;
-    detailBody.appendChild(tr);
-  });
-  detailTable.appendChild(detailBody);
-  panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["v2 detail — every classified market"]));
-  panel.appendChild(el("div", { class: "table-scroll" }, [detailTable]));
+  if (tagged.length) {
+    const cutoff = Date.now() - 24 * 3600 * 1000;
+    const recent = tagged.filter((t) => (Date.parse(t.x.m.close_time || 0) || 0) >= cutoff);
+    const worst24 = recent.slice().sort((a, b) => a.ratio - b.ratio).slice(0, 3);
+    const allTimeWorst = tagged.reduce((a, b) => (b.ratio < a.ratio ? b : a));
+
+    const rect = el("div", { class: "worst-case-rect" }, [
+      el("h2", {}, ["Worst Closing Ratios — Last 24 Hours"]),
+    ]);
+
+    if (!worst24.length) {
+      rect.appendChild(el("div", { class: "empty-state" }, ["No v1/v2 qualifying markets with a closing ratio in the last 24 hours."]));
+    } else {
+      const wTable = el("table", { class: "data" });
+      wTable.innerHTML = "<thead><tr><th>Market (close)</th><th>Trigger</th><th>Final</th><th>Shrink</th></tr></thead>";
+      const wBody = el("tbody");
+      worst24.forEach((t) => {
+        const tr = el("tr");
+        if (t.ratio < CR_FLAG_MAX) tr.className = "cr-flagged-row";
+        tr.innerHTML =
+          `<td>${fmtTime(t.x.m.close_time)} <span class="wc-note">${t.version}</span></td>` +
+          `<td>${fmtUsd(t.trigger, 0)} <span class="wc-note">(100%)</span></td>` +
+          `<td>${t.final === null ? "–" : fmtUsd(t.final, 0)} <span class="wc-note">(${Math.round(t.ratio * 100)}%)</span></td>` +
+          `<td>${t.final === null ? "–" : fmtUsd(t.trigger - t.final, 0)} <span class="wc-note">(${Math.round((1 - t.ratio) * 100)} pts)</span></td>`;
+        wBody.appendChild(tr);
+      });
+      wTable.appendChild(wBody);
+      rect.appendChild(el("div", { class: "table-scroll" }, [wTable]));
+    }
+
+    rect.appendChild(el("div", { class: "hint", style: "margin-top:10px" }, [
+      `All-time worst: `,
+      el("b", {}, [fmtTime(allTimeWorst.x.m.close_time)]),
+      ` · `, el("b", {}, [allTimeWorst.version]),
+      ` predicted ${allTimeWorst.x.predicted === "yes" ? "UP" : "DOWN"}, settled ${allTimeWorst.x.result === "yes" ? "UP" : "DOWN"} · closing ratio `,
+      el("b", {}, [allTimeWorst.ratio.toFixed(2) + "×"]),
+      ` (${allTimeWorst.ratio < 0 ? "flipped to the opposite sign" : Math.round(allTimeWorst.ratio * 100) + "% of trigger value retained"}).`,
+    ]));
+
+    panel.appendChild(rect);
+  }
 
   return panel;
 }
