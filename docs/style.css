@@ -402,6 +402,11 @@ footer a { color: var(--text-secondary); }
 .arrow-cell.up { color: var(--good); }
 .arrow-cell.down { color: var(--critical); }
 
+/* --- volatility (Insights) --- */
+.vol-flag { cursor: help; }
+.vol-flagged-row td { background: rgba(237, 161, 0, 0.10); }
+.vol-today td { font-weight: 600; }
+
 /* --- export --- */
 .export-specific { margin: 4px 0 12px; }
 .export-multiselect {
