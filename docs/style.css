@@ -385,45 +385,22 @@ footer a { color: var(--text-secondary); }
 }
 .big-insight b { font-variant-numeric: tabular-nums; }
 
-/* --- compare --- */
-.compare-picker {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(220px, 1fr));
-  gap: 14px;
-}
-.compare-picker .combo {
-  width: 100%;
-}
-.compare-output {
+/* --- settled arrow tracker (Live) --- */
+.arrow-grid {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 2px 3px;
+  line-height: 1;
 }
-.compare-heading {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(220px, 1fr));
-  gap: 20px;
-}
-.compare-heading h2 {
-  margin: 2px 0 0;
-  font-size: 14px;
-}
-.compare-kicker {
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 600;
-}
-.compare-table td:nth-child(2),
-.compare-table td:nth-child(3),
-.compare-table td:nth-child(4) {
+.arrow-cell {
+  font-size: 15px;
+  width: 15px;
+  text-align: center;
+  cursor: default;
   font-variant-numeric: tabular-nums;
 }
-@media (max-width: 760px) {
-  .compare-picker,
-  .compare-heading {
-    grid-template-columns: 1fr;
-  }
-}
+.arrow-cell.up { color: var(--good); }
+.arrow-cell.down { color: var(--critical); }
 
 /* --- export --- */
 .export-specific { margin: 4px 0 12px; }
