@@ -625,6 +625,178 @@ function computeComebacks(markets) {
   return out;
 }
 
+// ---------- volatility metrics ----------
+const VOL_FLAG_RATIO = 2.5;      // vol_ratio above this is "unusually large" ⚡
+const VOL_BASELINE_MAX = 20;     // trailing markets used for the baseline
+const VOL_BASELINE_MIN = 5;      // don't emit a ratio against a thinner baseline
+
+function marketKey(m) { return m.ticker || m.close_time || ""; }
+
+// Per-market movement metrics from the shipped timelines, plus each market's
+// price_range relative to the trailing-20 baseline of chronologically PRIOR
+// markets. Returns a Map keyed by marketKey(m).
+function computeVolMetrics(data) {
+  const chrono = settledList(data); // oldest → newest
+  const metrics = new Map();
+  const priorRanges = [];           // price_ranges of already-processed markets
+
+  for (const m of chrono) {
+    const tl = m.timeline || [];
+    const dtl = m.diff_timeline || [];
+
+    // price_range: span of BTC-vs-strike movement; needs >=2 samples to mean
+    // anything (a single sample would report a fake 0 and drag the baseline).
+    let priceRange = null;
+    if (dtl.length >= 2) {
+      const vals = dtl.map((pt) => pt[1]);
+      priceRange = Math.max(...vals) - Math.min(...vals);
+    }
+
+    // flip_count: favored-side changes, i.e. crossings of the 50% line.
+    let flipCount = 0;
+    let prevSide = null;
+    for (const pt of tl) {
+      const side = pt[1] > 50 ? "yes" : pt[1] < 50 ? "no" : null; // exactly 50 = no side
+      if (side && prevSide && side !== prevSide) flipCount++;
+      if (side) prevSide = side;
+    }
+
+    // swing_count: direction reversals anywhere in the probability path
+    // (every local peak/trough, zigzags included even on one side of 50).
+    let swingCount = 0;
+    let prevDir = 0;
+    for (let i = 1; i < tl.length; i++) {
+      const d = Math.sign(tl[i][1] - tl[i - 1][1]);
+      if (d !== 0) {
+        if (prevDir !== 0 && d !== prevDir) swingCount++;
+        prevDir = d;
+      }
+    }
+
+    // vol_ratio: this market's range vs the average of the trailing prior
+    // ranges. Skipped until enough history exists for a meaningful baseline.
+    let volRatio = null;
+    if (priceRange !== null && priorRanges.length >= VOL_BASELINE_MIN) {
+      const base = priorRanges.slice(-VOL_BASELINE_MAX);
+      const avg = base.reduce((a, b) => a + b, 0) / base.length;
+      if (avg > 0) volRatio = priceRange / avg;
+    }
+
+    if (tl.length >= 2 || dtl.length >= 2) {
+      metrics.set(marketKey(m), {
+        m,
+        date: utcDate(m.close_time),
+        priceRange,
+        flipCount,
+        swingCount,
+        volRatio,
+        flagged: volRatio !== null && volRatio > VOL_FLAG_RATIO,
+        probSamples: tl.length,
+      });
+    }
+    if (priceRange !== null) priorRanges.push(priceRange);
+  }
+  return metrics;
+}
+
+function volFlag(v) {
+  return v !== null && v !== undefined && v > VOL_FLAG_RATIO
+    ? ' <span class="vol-flag" title="vol_ratio > 2.5× the trailing-20 baseline">⚡</span>'
+    : "";
+}
+
+function fmtRatio(v) {
+  return v === null || v === undefined ? "–" : v.toFixed(2) + "×";
+}
+
+function volatilityPanel(volMetrics) {
+  const all = Array.from(volMetrics.values());
+  const panel = el("div", { class: "panel" }, [
+    el("h2", {}, ["Volatility"]),
+    el("div", { class: "desc" }, [
+      "Per-market movement computed from the sampled timelines: price_range = span of BTC-vs-target movement ($); flips = favored-side changes (50% crossings); swings = every direction reversal in the odds path; vol_ratio = this market's price_range vs the average of the trailing 20 prior markets. ⚡ marks vol_ratio > 2.5× — an unusually large move vs recent baseline.",
+    ]),
+  ]);
+
+  if (!all.length) {
+    panel.appendChild(el("div", { class: "empty-state" }, [
+      "No markets with enough sampled timeline data yet — volatility metrics need at least 2 in-window samples per market.",
+    ]));
+    return panel;
+  }
+
+  // --- headline: today vs recent normal ---
+  const today = utcDate(new Date().toISOString());
+  const withRange = all.filter((x) => x.priceRange !== null);
+  const withRatio = all.filter((x) => x.volRatio !== null);
+  const avg = (arr, f) => (arr.length ? arr.reduce((a, x) => a + f(x), 0) / arr.length : null);
+  const todayRange = avg(withRange.filter((x) => x.date === today), (x) => x.priceRange);
+  const todayRatio = avg(withRatio.filter((x) => x.date === today), (x) => x.volRatio);
+  const allRange = avg(withRange, (x) => x.priceRange);
+  const flaggedCount = all.filter((x) => x.flagged).length;
+
+  panel.appendChild(el("div", { class: "tiles" }, [
+    tile("Today's avg price range", todayRange === null ? "–" : fmtUsd(todayRange, 0),
+      allRange === null ? "" : `all-time avg ${fmtUsd(allRange, 0)}`),
+    tile("Today's avg vol ratio", todayRatio === null ? "–" : fmtRatio(todayRatio),
+      "1.00× = same as recent normal", todayRatio !== null && todayRatio > 1.5 ? "down" : undefined),
+    tile("⚡ Unusual moves", String(flaggedCount), `vol_ratio > ${VOL_FLAG_RATIO}× all-time`),
+  ]));
+
+  // --- daily averages table ---
+  const byDay = {};
+  for (const x of all) {
+    const d = (byDay[x.date] ||= { ranges: [], ratios: [], n: 0, flagged: 0 });
+    d.n++;
+    if (x.priceRange !== null) d.ranges.push(x.priceRange);
+    if (x.volRatio !== null) d.ratios.push(x.volRatio);
+    if (x.flagged) d.flagged++;
+  }
+  const days = Object.keys(byDay).sort().reverse();
+  const dayTable = el("table", { class: "data" });
+  dayTable.innerHTML = "<thead><tr><th>Date (UTC)</th><th>Markets</th><th>Avg price range</th><th>Avg vol ratio</th><th>⚡ flagged</th></tr></thead>";
+  const dayBody = el("tbody");
+  days.forEach((d) => {
+    const v = byDay[d];
+    const ar = v.ranges.length ? v.ranges.reduce((a, b) => a + b, 0) / v.ranges.length : null;
+    const at = v.ratios.length ? v.ratios.reduce((a, b) => a + b, 0) / v.ratios.length : null;
+    const tr = el("tr");
+    if (d === today) tr.className = "vol-today";
+    tr.innerHTML =
+      `<td>${d}${d === today ? " (today)" : ""}</td><td>${v.n}</td>` +
+      `<td>${ar === null ? "–" : fmtUsd(ar, 0)}</td>` +
+      `<td>${fmtRatio(at)}</td><td>${v.flagged || ""}</td>`;
+    dayBody.appendChild(tr);
+  });
+  dayTable.appendChild(dayBody);
+  panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Daily averages"]));
+  panel.appendChild(el("div", { class: "table-scroll" }, [dayTable]));
+
+  // --- whipsaw leaderboard ---
+  const whipsaw = all
+    .filter((x) => x.probSamples >= 2)
+    .sort((a, b) => (b.swingCount - a.swingCount) || (b.flipCount - a.flipCount) || ((b.volRatio || 0) - (a.volRatio || 0)))
+    .slice(0, 10);
+  const wsTable = el("table", { class: "data" });
+  wsTable.innerHTML = "<thead><tr><th>Market (close)</th><th>Swings</th><th>Flips</th><th>Price range</th><th>Vol ratio</th><th>Result</th></tr></thead>";
+  const wsBody = el("tbody");
+  whipsaw.forEach((x) => {
+    const tr = el("tr");
+    if (x.flagged) tr.className = "vol-flagged-row";
+    tr.innerHTML =
+      `<td>${fmtTime(x.m.close_time)}</td><td>${x.swingCount}</td><td>${x.flipCount}</td>` +
+      `<td>${x.priceRange === null ? "–" : fmtUsd(x.priceRange, 0)}</td>` +
+      `<td>${fmtRatio(x.volRatio)}${volFlag(x.volRatio)}</td>` +
+      `<td>${resultBadge(x.m.result)}</td>`;
+    wsBody.appendChild(tr);
+  });
+  wsTable.appendChild(wsBody);
+  panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Whipsaw leaderboard — most zigzag markets"]));
+  panel.appendChild(el("div", { class: "table-scroll" }, [wsTable]));
+
+  return panel;
+}
+
 function goldenRulePanel(withDiff) {
   const gr = computeGoldenRule(withDiff);
   const correct = gr.filter((x) => x.correct).length;
@@ -677,9 +849,10 @@ function goldenRulePanel(withDiff) {
   return panel;
 }
 
-function comebacksPanel(withTl) {
+function comebacksPanel(withTl, volMetrics) {
   const cb = computeComebacks(withTl);
   const rate = withTl.length ? (cb.length / withTl.length) * 100 : null;
+  const volOf = (m) => (volMetrics && volMetrics.get(marketKey(m))) || null;
 
   const panel = el("div", { class: "panel" }, [
     el("h2", {}, ["Comebacks Tracker"]),
@@ -700,13 +873,15 @@ function comebacksPanel(withTl) {
 
   const table = el("table", { class: "data" });
   table.innerHTML =
-    "<thead><tr><th>When (close)</th><th>Favored</th><th>Peak odds</th><th>Min left</th><th>Gap @ peak</th><th>Gap @ close</th><th>Winner</th></tr></thead>";
+    "<thead><tr><th>When (close)</th><th>Favored</th><th>Peak odds</th><th>Min left</th><th>Gap @ peak</th><th>Gap @ close</th><th>Winner</th><th>Swings</th><th>Vol ratio</th></tr></thead>";
   const tbody = el("tbody");
   cb.forEach((x) => {
     const tr = el("tr");
     const favLabel = x.favored === "yes" ? '<span class="up">UP</span>' : '<span class="down">DOWN</span>';
     const gapAt = x.gapAtExtreme === null ? "–" : (x.gapAtExtreme >= 0 ? "+" : "") + fmtUsd(x.gapAtExtreme, 0);
     const gapClose = x.gapAtClose === null ? "–" : (x.gapAtClose >= 0 ? "+" : "") + fmtUsd(x.gapAtClose, 0);
+    const vol = volOf(x.m);
+    if (vol && vol.flagged) tr.className = "vol-flagged-row";
     tr.innerHTML =
       `<td>${fmtTime(x.m.close_time)}</td>` +
       `<td>${favLabel}</td>` +
@@ -714,7 +889,9 @@ function comebacksPanel(withTl) {
       `<td>${x.minutesLeft}</td>` +
       `<td>${gapAt}</td>` +
       `<td>${gapClose}</td>` +
-      `<td>${resultBadge(x.result)}</td>`;
+      `<td>${resultBadge(x.result)}</td>` +
+      `<td>${vol ? vol.swingCount : "–"}</td>` +
+      `<td>${vol ? fmtRatio(vol.volRatio) + volFlag(vol.volRatio) : "–"}</td>`;
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
@@ -744,8 +921,10 @@ function renderInsights(root, data) {
   ]));
 
   // --- headline trackers (auto-computed from timelines) ---
+  const volMetrics = computeVolMetrics(data);
   root.appendChild(goldenRulePanel(withDiff));
-  root.appendChild(comebacksPanel(withTl));
+  root.appendChild(comebacksPanel(withTl, volMetrics));
+  root.appendChild(volatilityPanel(volMetrics));
 
   // --- interactive explorer ---
   const thrInput = el("input", { type: "range", min: "50", max: "95", step: "1", value: "58" });
