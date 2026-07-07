@@ -1,0 +1,162 @@
+.last5-volatility-widget {
+  position: relative;
+  overflow: hidden;
+}
+
+.last5-volatility-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.last5-volatility-pill {
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.last5-volatility-pill.calm {
+  background: rgba(27, 175, 122, 0.12);
+  color: var(--series-aqua);
+}
+
+.last5-volatility-pill.normal {
+  background: rgba(42, 120, 214, 0.12);
+  color: var(--series-blue);
+}
+
+.last5-volatility-pill.elevated {
+  background: rgba(208, 59, 59, 0.12);
+  color: var(--critical);
+}
+
+.last5-volatility-pill.unknown {
+  background: rgba(137, 135, 129, 0.12);
+  color: var(--text-muted);
+}
+
+.last5-volatility-layout {
+  display: grid;
+  grid-template-columns: minmax(150px, 230px) 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.last5-volatility-score-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.last5-volatility-score {
+  font-size: 54px;
+  line-height: 0.95;
+  font-weight: 800;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.last5-volatility-score.calm,
+.last5-volatility-tile .value.calm {
+  color: var(--series-aqua);
+}
+
+.last5-volatility-score.normal,
+.last5-volatility-tile .value.normal {
+  color: var(--series-blue);
+}
+
+.last5-volatility-score.elevated,
+.last5-volatility-tile .value.elevated {
+  color: var(--critical);
+}
+
+.last5-volatility-score:not(.unknown)::after {
+  content: "%";
+  font-size: 22px;
+  margin-left: 2px;
+  color: var(--text-muted);
+}
+
+.last5-volatility-score-label,
+.last5-volatility-trend-label {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.last5-volatility-gauge {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--gridline);
+  overflow: hidden;
+}
+
+.last5-volatility-gauge-fill {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.last5-volatility-gauge-fill.calm { background: var(--series-aqua); }
+.last5-volatility-gauge-fill.normal { background: var(--series-blue); }
+.last5-volatility-gauge-fill.elevated { background: var(--critical); }
+.last5-volatility-gauge-fill.unknown { background: var(--text-muted); }
+
+.last5-volatility-spark {
+  height: 84px;
+  margin-top: 4px;
+}
+
+.last5-volatility-spark svg {
+  width: 100%;
+  height: 84px;
+  display: block;
+  overflow: visible;
+}
+
+.last5-volatility-ref {
+  stroke: var(--gridline);
+  stroke-width: 0.8;
+  stroke-dasharray: 2 2;
+}
+
+.last5-volatility-line {
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.last5-volatility-dot {
+  stroke: var(--surface-1);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.last5-volatility-line.calm,
+.last5-volatility-dot.calm {
+  stroke: var(--series-aqua);
+  fill: var(--series-aqua);
+}
+
+.last5-volatility-line.normal,
+.last5-volatility-dot.normal {
+  stroke: var(--series-blue);
+  fill: var(--series-blue);
+}
+
+.last5-volatility-line.elevated,
+.last5-volatility-dot.elevated {
+  stroke: var(--critical);
+  fill: var(--critical);
+}
+
+@media (max-width: 760px) {
+  .last5-volatility-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .last5-volatility-score {
+    font-size: 46px;
+  }
+}
