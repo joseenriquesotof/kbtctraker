@@ -33,7 +33,7 @@ GitHub Actions (every 5 min)          docs/ (GitHub Pages)
   streaks, per-market summaries) into `docs/data.json`.
 - **`.github/workflows/collect.yml`** is launched by cron every 5 minutes
   (GitHub's minimum) and *loops internally*, taking several snapshots per
-  run (default 3, 120s apart) so the effective cadence is ~2 minutes. It
+  run (default 6, 40s apart) so the effective cadence is ~40 seconds. It
   aggregates once at the end and commits the results back to the repo,
   which is why it needs `contents: write` permission. Public repos get
   unlimited free Actions minutes, so the extra runner time is free.
@@ -77,15 +77,21 @@ whichever branch Vercel is tracking).
 
 - **Resolution**: GitHub Actions cron can only *launch* a run every 5
   minutes (and may lag under load), but each run loops internally to take
-  a snapshot about every 2 minutes, so a 15-minute market gets roughly
-  6-8 readings. The dashboard checks for a fresher `data.json` every
-  minute, but the published data can still lag while Actions commits and
-  Pages/Vercel redeploys. Good for seeing the shape of each window and
+  a snapshot about every 40 seconds, so a 15-minute market can get a
+  couple dozen readings — enough for the Golden Rule tracker's last-3-minute
+  window to usually catch 2+ samples (the "confirmed" tier) instead of just
+  one. There's still a gap between the last sample of one run and the first
+  of the next while GitHub queues the next cron firing, so it's not a
+  guaranteed continuous feed. The dashboard checks for a fresher `data.json`
+  every minute, but the published data can still lag while Actions commits
+  and Pages/Vercel redeploys. Good for seeing the shape of each window and
   building long-run stats; still not a tick-by-tick trading feed. For
   tighter or guaranteed timing, run the collector locally (see below)
   where you control the interval down to seconds. To change the cadence,
   edit `SAMPLES`/`INTERVAL` in `.github/workflows/collect.yml`, or trigger
-  a run manually with custom values via Actions → Run workflow.
+  a run manually with custom values via Actions → Run workflow — keep
+  `SAMPLES × INTERVAL` comfortably under 5 minutes so runs don't back up
+  behind each other.
 - **Target/strike price**: shown as "Kalshi Target" — the BTC price the
   active contract settles against (Kalshi's `floor_strike`/`cap_strike`).
 - **YES probability**: the mid of Kalshi's live yes bid/ask, in %. This

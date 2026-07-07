@@ -595,6 +595,208 @@ function computeGoldenRule(markets) {
   return q;
 }
 
+// Golden Rule v2: same last-3-minute window as v1, but classifies every market
+// into exactly one tier based on how many samples landed in the window and
+// whether they agree, so a lone sample near a ~2-min polling gap (unconfirmed
+// but not wrong) is told apart from a gap that genuinely failed to hold
+// (a real reversal). v1 is untouched -- this is a separate, additive pass.
+const CR_FLAG_MAX = 0.5; // closing_ratio below this is flagged (orange)
+
+function windowSamplesOf(m) {
+  return (m.diff_timeline || []).filter((pt) => pt[0] >= 12);
+}
+
+// closing_ratio = last sample in the ENTIRE diff_timeline / the sample that
+// first triggered the rule (chronologically first qualifying window sample).
+// Shared definition so v1 and v2 produce comparable ratios.
+function closingRatioFrom(triggerValue, dtl) {
+  if (!dtl.length || !triggerValue) return null;
+  return dtl[dtl.length - 1][1] / triggerValue;
+}
+
+function computeGoldenRuleV2(markets) {
+  const out = { confirmed: [], single_reading: [], rejected: [] };
+  for (const m of markets) {
+    const win = windowSamplesOf(m);
+    if (!win.length) continue; // no data in window -- not classified by v2 either
+
+    let tier;
+    if (win.length >= 2) {
+      // "rejected" catches both the documented case (a sample under $50) and
+      // the rarer case of all samples being big but flipping sign -- either
+      // way the gap didn't hold consistently, which is what v2 is guarding
+      // against.
+      const allBig = win.every((pt) => Math.abs(pt[1]) >= 50);
+      const sameSign = allBig && win.every((pt) => Math.sign(pt[1]) === Math.sign(win[0][1]));
+      tier = sameSign ? "confirmed" : "rejected";
+    } else {
+      tier = Math.abs(win[0][1]) >= 50 ? "single_reading" : null;
+    }
+    if (!tier) continue;
+
+    // Predicted side: for confirmed/single_reading, the (only or unanimous)
+    // triggering sample's direction. For rejected, there's no consistent
+    // direction by definition, so -- for transparency only, since these are
+    // excluded from the qualifying pool -- we use the LAST in-window sample's
+    // direction (the final read before close).
+    const triggerPt = tier === "rejected" ? win[win.length - 1] : win[0];
+    const predicted = triggerPt[1] > 0 ? "yes" : "no";
+    const dtl = m.diff_timeline || [];
+
+    const rec = {
+      m, tier, date: utcDate(m.close_time), predicted, result: m.result,
+      correct: m.result === predicted,
+      triggerMinute: triggerPt[0], triggerValue: triggerPt[1],
+      windowSampleCount: win.length,
+      closingRatio: null, signFlipInWindow: false,
+    };
+
+    if (tier === "confirmed" || tier === "single_reading") {
+      rec.closingRatio = closingRatioFrom(win[0][1], dtl);
+      const firstSign = Math.sign(win[0][1]);
+      rec.signFlipInWindow = win.some((pt) => Math.sign(pt[1]) !== 0 && Math.sign(pt[1]) !== firstSign);
+    }
+
+    out[tier].push(rec);
+  }
+  return out;
+}
+
+const CR_BUCKETS = [
+  ["< 0 (reversed)", -Infinity, 0],
+  ["0.0 – 0.5 ⚠", 0, CR_FLAG_MAX],
+  ["0.5 – 0.8", CR_FLAG_MAX, 0.8],
+  ["0.8 – 1.0", 0.8, 1.0],
+  ["≥ 1.0 (held/grew)", 1.0, Infinity],
+];
+
+function crStats(ratios) {
+  const valid = ratios.filter((r) => r !== null && r !== undefined && Number.isFinite(r));
+  return {
+    avg: valid.length ? valid.reduce((a, b) => a + b, 0) / valid.length : null,
+    n: valid.length,
+    buckets: CR_BUCKETS.map(([label, lo, hi]) => ({
+      label, count: valid.filter((r) => r >= lo && r < hi).length,
+    })),
+  };
+}
+
+function goldenRuleV2Panel(withDiff) {
+  const v1 = computeGoldenRule(withDiff); // recomputed here only -- v1 itself is untouched
+  const v2 = computeGoldenRuleV2(withDiff);
+  const v2Qualifying = [...v2.confirmed, ...v2.single_reading];
+  const v2Correct = v2Qualifying.filter((x) => x.correct).length;
+  const v1Correct = v1.filter((x) => x.correct).length;
+
+  const panel = el("div", { class: "panel" }, [
+    el("h2", {}, ["Golden Rule v2 — Confirmed vs. Single-Reading vs. Rejected"]),
+    el("div", { class: "desc" }, [
+      "v1 (above) fires on any single qualifying sample in the last 3 minutes. v2 checks whether the ~2-minute polling cadence actually caught enough of the window to trust it: ",
+      el("b", {}, ["confirmed"]), " — 2+ samples in the window, all ≥$50 the same direction. ",
+      el("b", {}, ["single-reading"]), " — only 1 sample landed in the window (a polling gap, not a weak signal — still ≥$50). ",
+      el("b", {}, ["rejected"]), " — 2+ samples exist but they disagree or one fell under $50: the gap genuinely didn't hold, so these are excluded from v2's qualifying pool.",
+    ]),
+  ]);
+
+  if (!v1.length && !v2Qualifying.length && !v2.rejected.length) {
+    panel.appendChild(el("div", { class: "empty-state" }, [
+      "No v1 or v2 activity yet — this fills in as markets are caught live near close.",
+    ]));
+    return panel;
+  }
+
+  // --- v1 vs v2 side by side ---
+  panel.appendChild(el("div", { class: "tiles" }, [
+    tile("v1 qualifying", String(v1.length), "any single ≥$50 sample"),
+    tile("v1 accuracy", v1.length ? fmtPct(v1Correct / v1.length * 100, 1) : "–", `${v1Correct} correct of ${v1.length}`),
+    tile("v2 qualifying", String(v2Qualifying.length), "confirmed + single-reading"),
+    tile("v2 accuracy", v2Qualifying.length ? fmtPct(v2Correct / v2Qualifying.length * 100, 1) : "–", `${v2Correct} correct of ${v2Qualifying.length}`),
+  ]));
+
+  // --- per-tier breakdown ---
+  const tierRow = (label, list, note) => {
+    const c = list.filter((x) => x.correct).length;
+    return tile(label, String(list.length), list.length ? `${fmtPct(c / list.length * 100, 0)} accurate — ${note}` : note);
+  };
+  panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["v2 by tier"]));
+  panel.appendChild(el("div", { class: "tiles" }, [
+    tierRow("Confirmed", v2.confirmed, "high confidence"),
+    tierRow("Single-reading", v2.single_reading, "polling gap, not a weak signal"),
+    tierRow("Rejected", v2.rejected, "excluded from qualifying — shown for reference only"),
+  ]));
+  panel.appendChild(el("div", { class: "hint" }, [
+    "Single-reading markets are lower-confidence only because a ~2-minute poll may have missed a confirming second sample in the 3-minute window — the trigger itself is just as real as a confirmed one.",
+  ]));
+
+  // --- closing_ratio: v1 vs v2 ---
+  const v1Ratios = v1.map((x) => closingRatioFrom(windowSamplesOf(x.m)[0]?.[1], x.m.diff_timeline || []));
+  const v2Ratios = v2Qualifying.map((x) => x.closingRatio);
+  const v1Cr = crStats(v1Ratios);
+  const v2Cr = crStats(v2Ratios);
+
+  panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Closing ratio — how much the gap held (v1 vs. v2)"]));
+  panel.appendChild(el("div", { class: "desc" }, [
+    "closing_ratio = (last diff_timeline sample) ÷ (the sample that first triggered the rule). Below 1.0 means the gap shrank before close; below " + CR_FLAG_MAX + " (⚠) is flagged as a weak finish.",
+  ]));
+  panel.appendChild(el("div", { class: "tiles" }, [
+    tile("v1 avg closing ratio", v1Cr.avg === null ? "–" : v1Cr.avg.toFixed(2) + "×", `${v1Cr.n} markets`),
+    tile("v2 avg closing ratio", v2Cr.avg === null ? "–" : v2Cr.avg.toFixed(2) + "×", `${v2Cr.n} markets`),
+  ]));
+
+  const crTable = el("table", { class: "data" });
+  crTable.innerHTML = "<thead><tr><th>Closing ratio</th><th>v1 count</th><th>v2 count</th></tr></thead>";
+  const crBody = el("tbody");
+  CR_BUCKETS.forEach((_, i) => {
+    const tr = el("tr");
+    tr.innerHTML = `<td>${v1Cr.buckets[i].label}</td><td>${v1Cr.buckets[i].count}</td><td>${v2Cr.buckets[i].count}</td>`;
+    crBody.appendChild(tr);
+  });
+  crTable.appendChild(crBody);
+  panel.appendChild(el("div", { class: "table-scroll" }, [crTable]));
+
+  // --- worst case ever (lowest closing_ratio across both versions) ---
+  const tagged = [
+    ...v1.map((x, i) => ({ x, ratio: v1Ratios[i], version: "v1" })),
+    ...v2Qualifying.map((x) => ({ x, ratio: x.closingRatio, version: `v2 (${x.tier.replace("_", "-")})` })),
+  ].filter((t) => t.ratio !== null && t.ratio !== undefined && Number.isFinite(t.ratio));
+  if (tagged.length) {
+    const worst = tagged.reduce((a, b) => (b.ratio < a.ratio ? b : a));
+    panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Worst case ever recorded"]));
+    panel.appendChild(el("div", { class: "big-insight" + (worst.ratio < CR_FLAG_MAX ? " down" : "") }, [
+      `${fmtTime(worst.x.m.close_time)} · `,
+      el("b", {}, [worst.version]),
+      ` predicted ${worst.x.predicted === "yes" ? "UP" : "DOWN"}, market settled ${worst.x.result === "yes" ? "UP" : "DOWN"} · closing ratio `,
+      el("b", {}, [worst.ratio.toFixed(2) + "×"]),
+      ` — the gap shrank to ${worst.ratio < 0 ? "the opposite sign" : Math.round(worst.ratio * 100) + "% of its trigger value"} by the last available reading.`,
+    ]));
+  }
+
+  // --- v2 detail table ---
+  const allV2 = [...v2.confirmed, ...v2.single_reading, ...v2.rejected]
+    .sort((a, b) => (Date.parse(b.m.close_time || 0) || 0) - (Date.parse(a.m.close_time || 0) || 0));
+  const detailTable = el("table", { class: "data" });
+  detailTable.innerHTML = "<thead><tr><th>Closed</th><th>Tier</th><th>Predicted</th><th>Result</th><th>Closing ratio</th><th>Sign flip in window</th></tr></thead>";
+  const detailBody = el("tbody");
+  allV2.forEach((x) => {
+    const tr = el("tr");
+    if (x.closingRatio !== null && x.closingRatio < CR_FLAG_MAX) tr.className = "cr-flagged-row";
+    const tierBadge = x.tier === "confirmed" ? '<span class="up">confirmed</span>'
+      : x.tier === "single_reading" ? '<span class="badge unknown">single-reading</span>'
+      : '<span class="down">rejected</span>';
+    tr.innerHTML =
+      `<td>${fmtTime(x.m.close_time)}</td><td>${tierBadge}</td>` +
+      `<td>${x.predicted === "yes" ? "UP" : "DOWN"}</td><td>${resultBadge(x.result)}</td>` +
+      `<td>${x.closingRatio === null ? "–" : x.closingRatio.toFixed(2) + "×" + (x.closingRatio < CR_FLAG_MAX ? " ⚠" : "")}</td>` +
+      `<td>${x.tier === "rejected" ? "–" : (x.signFlipInWindow ? "yes" : "no")}</td>`;
+    detailBody.appendChild(tr);
+  });
+  detailTable.appendChild(detailBody);
+  panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["v2 detail — every classified market"]));
+  panel.appendChild(el("div", { class: "table-scroll" }, [detailTable]));
+
+  return panel;
+}
+
 // Comebacks: one side hit >=85% (or the other <=15%) before the final minute
 // (minutes_elapsed < 14), yet the OPPOSITE side won.
 function computeComebacks(markets) {
@@ -797,6 +999,146 @@ function volatilityPanel(volMetrics) {
   return panel;
 }
 
+// ---------- Last-5 Volatility % ----------
+// Percentile-composite volatility score. Each settled market is ranked against
+// ALL chronologically-prior settled markets (expanding window, not a recent
+// slice):
+//   composite = 0.5*price_range_pct + 0.3*swing_pct + 0.2*flip_pct
+// where each *_pct = % of prior markets with that metric <= this market's.
+// Because a market's priors never change, its composite is immutable once
+// computed — it's cached per ticker, so each refresh only scores markets that
+// settled since the last one. Last-5 Volatility % = mean composite of the 5
+// most recently closed scored markets.
+const COMPOSITE_MIN_PRIOR = 10;  // don't rank against a thinner history
+const VOL_BANDS = [
+  { max: 35, cls: "calm", label: "Calm" },
+  { max: 65, cls: "normal", label: "Normal" },
+  { max: Infinity, cls: "elevated", label: "Elevated" },
+];
+const compositeCache = new Map();
+
+function volBand(v) { return VOL_BANDS.find((b) => v <= b.max); }
+
+function pctAtOrBelow(arr, v) {
+  let n = 0;
+  for (const e of arr) if (e <= v) n++;
+  return (n / arr.length) * 100;
+}
+
+// Chronological list of scored markets: [{ x: volMetricsRecord, composite }].
+function computeComposites(volMetrics) {
+  const chrono = Array.from(volMetrics.values())
+    .filter((x) => x.priceRange !== null && x.probSamples >= 2)
+    .sort((a, b) => (Date.parse(a.m.close_time || 0) || 0) - (Date.parse(b.m.close_time || 0) || 0));
+  const ranges = [], swings = [], flips = [];
+  const scored = [];
+  for (const x of chrono) {
+    const key = marketKey(x.m);
+    let comp;
+    if (compositeCache.has(key)) {
+      comp = compositeCache.get(key);
+    } else {
+      comp = ranges.length >= COMPOSITE_MIN_PRIOR
+        ? 0.5 * pctAtOrBelow(ranges, x.priceRange)
+        + 0.3 * pctAtOrBelow(swings, x.swingCount)
+        + 0.2 * pctAtOrBelow(flips, x.flipCount)
+        : null;
+      compositeCache.set(key, comp);
+    }
+    if (comp !== null) scored.push({ x, composite: comp, close_time: x.m.close_time });
+    ranges.push(x.priceRange);
+    swings.push(x.swingCount);
+    flips.push(x.flipCount);
+  }
+  return scored;
+}
+
+// Rolling mean of the trailing 5 composites, evaluated at each scored market.
+function rollingLastFive(scored) {
+  const out = [];
+  for (let i = 4; i < scored.length; i++) {
+    let s = 0;
+    for (let j = i - 4; j <= i; j++) s += scored[j].composite;
+    out.push({ close_time: scored[i].close_time, value: s / 5 });
+  }
+  return out;
+}
+
+// Sparkline of the rolling number over the last ~30 markets. De-emphasis line,
+// band-colored dot on the current value, dashed refs at the 35/65 band edges.
+function volSparkline(roll) {
+  const pts = roll.slice(-30);
+  const W = 300, H = 46, padT = 5, padB = 5;
+  const wrap = el("div", { class: "vg-spark-wrap" });
+  const svg = svgEl("svg", { class: "vg-spark", viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "none" });
+  wrap.appendChild(svg);
+  const yAt = (v) => padT + (1 - v / 100) * (H - padT - padB);
+  const xAt = (i) => (pts.length <= 1 ? W / 2 : (i / (pts.length - 1)) * W);
+  [35, 65].forEach((v) => {
+    svg.appendChild(svgEl("line", { class: "grid", x1: 0, x2: W, y1: yAt(v), y2: yAt(v), "stroke-dasharray": "3 3" }));
+  });
+  let d = "";
+  pts.forEach((p, i) => { d += (i ? "L" : "M") + xAt(i).toFixed(1) + "," + yAt(p.value).toFixed(1) + " "; });
+  svg.appendChild(svgEl("path", { d, fill: "none", stroke: "var(--text-muted)", "stroke-width": 2 }));
+  const last = pts[pts.length - 1];
+  svg.appendChild(svgEl("circle", { cx: xAt(pts.length - 1), cy: yAt(last.value), r: 3.5, fill: "var(--vg-band)" }));
+
+  svg.addEventListener("mousemove", (evt) => {
+    const rect = svg.getBoundingClientRect();
+    let idx = Math.round(((evt.clientX - rect.left) / rect.width) * (pts.length - 1));
+    idx = Math.max(0, Math.min(pts.length - 1, idx));
+    const p = pts[idx];
+    tooltipEl.innerHTML = `<div>${fmtTime(p.close_time)}</div><div>Last-5 volatility: <b>${p.value.toFixed(0)}</b></div>`;
+    tooltipEl.style.display = "block";
+    tooltipEl.style.left = evt.pageX + 14 + "px";
+    tooltipEl.style.top = evt.pageY - 10 + "px";
+  });
+  svg.addEventListener("mouseleave", () => { tooltipEl.style.display = "none"; });
+  return wrap;
+}
+
+// The gauge block: hero number + state chip + banded meter + trend sparkline.
+// Used on both the Live tab and the Insights Volatility section.
+function volGaugeBlock(volMetrics) {
+  const scored = computeComposites(volMetrics);
+  const roll = rollingLastFive(scored);
+  const block = el("div", { class: "vol-gauge" });
+
+  block.appendChild(el("div", { class: "vg-label" }, ["Last-5 Volatility"]));
+
+  if (!roll.length) {
+    block.appendChild(el("div", { class: "vg-value" }, ["–"]));
+    block.appendChild(el("div", { class: "hint" }, [
+      `Needs 5 scored markets to start (a market is scored once ${COMPOSITE_MIN_PRIOR}+ prior markets exist to rank it against). ${scored.length} scored so far.`,
+    ]));
+    return block;
+  }
+
+  const cur = roll[roll.length - 1].value;
+  const band = volBand(cur);
+  block.classList.add(band.cls);
+
+  const row = el("div", { class: "vg-row" }, [
+    el("div", { class: "vg-value" }, [String(Math.round(cur))]),
+    el("div", { class: "vg-chip" }, [band.label]),
+  ]);
+  block.appendChild(row);
+
+  // meter: band-colored fill on a lighter same-color track, notches at 35/65
+  const meter = el("div", { class: "vg-meter" }, [
+    el("div", { class: "vg-fill", style: `width:${Math.max(2, Math.min(100, cur))}%` }),
+    el("div", { class: "vg-notch", style: "left:35%" }),
+    el("div", { class: "vg-notch", style: "left:65%" }),
+  ]);
+  block.appendChild(meter);
+
+  block.appendChild(volSparkline(roll));
+  block.appendChild(el("div", { class: "hint" }, [
+    `Average percentile-composite of the last 5 settled markets (0 = calmest in history, 100 = wildest) · trend over the last ${Math.min(30, roll.length)} markets · ${scored.length} markets scored. Under 35 = calm, 35–65 = normal, over 65 = elevated.`,
+  ]));
+  return block;
+}
+
 function goldenRulePanel(withDiff) {
   const gr = computeGoldenRule(withDiff);
   const correct = gr.filter((x) => x.correct).length;
@@ -923,6 +1265,7 @@ function renderInsights(root, data) {
   // --- headline trackers (auto-computed from timelines) ---
   const volMetrics = computeVolMetrics(data);
   root.appendChild(goldenRulePanel(withDiff));
+  root.appendChild(goldenRuleV2Panel(withDiff));
   root.appendChild(comebacksPanel(withTl, volMetrics));
   root.appendChild(volatilityPanel(volMetrics));
 
