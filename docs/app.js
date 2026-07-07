@@ -314,50 +314,55 @@ function renderLive(root, data) {
     barChart(volumeItems),
   ]));
 
+  // Client-side settled list + longest streak (with the span it covered), used
+  // by both the summary tile and the arrow tracker below.
+  const settledChrono = settledList(data);            // oldest → newest
+  const streak = longestStreak(settledChrono);
+  const streakLabel = streak.result === "yes" ? "UP" : "DOWN";
+
   const sm = data.summary || {};
   root.appendChild(el("div", { class: "panel" }, [
     el("h2", {}, ["All-Time Summary"]),
     el("div", { class: "tiles" }, [
-      tile("Markets Tracked", String(sm.total_markets_tracked ?? "–"), `${sm.settled_count ?? 0} settled`),
+      tile("Markets Tracked", String(sm.total_markets_tracked ?? "–"), `${sm.settled_count ?? settledChrono.length} settled`),
       tile("UP win rate", sm.up_win_rate_pct === null || sm.up_win_rate_pct === undefined ? "–" : fmtPct(sm.up_win_rate_pct), `${sm.up_wins ?? 0} up / ${sm.down_wins ?? 0} down`),
       tile("Time leaning YES", sm.pct_time_yes_leaning === null || sm.pct_time_yes_leaning === undefined ? "–" : fmtPct(sm.pct_time_yes_leaning), sm.pct_time_no_leaning === null || sm.pct_time_no_leaning === undefined ? "" : `NO: ${fmtPct(sm.pct_time_no_leaning)}`),
       tile("Current streak", sm.current_streak && sm.current_streak.result ? `${sm.current_streak.length} × ${sm.current_streak.result === "yes" ? "UP" : "DOWN"}` : "–"),
-      tile("Longest streak", sm.longest_streak && sm.longest_streak.result ? `${sm.longest_streak.length} × ${sm.longest_streak.result === "yes" ? "UP" : "DOWN"}` : "–"),
+      tile("Longest streak", streak.result ? `${streak.length} × ${streakLabel}` : "–", streak.result ? `${fmtTime(streak.start)} → ${fmtTime(streak.end)}` : ""),
       tile("Avg volume / market", sm.avg_volume === null || sm.avg_volume === undefined ? "–" : fmtNum(sm.avg_volume)),
     ]),
   ]));
 
-  const rows = data.recent_markets || [];
-  const tablePanel = el("div", { class: "panel" }, [el("h2", {}, ["Recent Settled Markets"])]);
-  if (rows.length === 0) {
-    tablePanel.appendChild(el("div", { class: "empty-state" }, ["No settled markets recorded yet."]));
+  // Compact settled up/down tracker: last 96 markets (~1 day) as arrows.
+  const last96 = settledChrono.slice(-96);
+  const trackerPanel = el("div", { class: "panel" }, [
+    el("h2", {}, ["Settled Markets — last 96 (~1 day)"]),
+    el("div", { class: "desc" }, ["Each arrow is one settled 15-minute market, oldest → newest. Green ▲ = UP (YES) won, red ▼ = DOWN (NO) won. Hover for time, target and result."]),
+  ]);
+  if (!last96.length) {
+    trackerPanel.appendChild(el("div", { class: "empty-state" }, ["No settled markets recorded yet."]));
   } else {
-    const table = el("table", { class: "data" });
-    table.innerHTML = `
-      <thead><tr>
-        <th>Closed</th><th>Target (strike)</th><th>Result</th><th>Volume</th>
-        <th>YES range</th><th>Time YES-leaning</th>
-      </tr></thead>`;
-    const tbody = el("tbody");
-    rows.forEach((r) => {
-      const tr = el("tr");
-      const totalSec = (r.yes_leaning_seconds || 0) + (r.no_leaning_seconds || 0);
-      const yesPct = totalSec ? (r.yes_leaning_seconds / totalSec * 100) : null;
-      const range = r.yes_prob_min === null || r.yes_prob_min === undefined
-        ? "–" : `${fmtPct(r.yes_prob_min)} – ${fmtPct(r.yes_prob_max)}`;
-      tr.innerHTML = `
-        <td>${fmtTime(r.close_time)}</td>
-        <td>${fmtUsd(r.strike, 2)}</td>
-        <td>${resultBadge(r.result)}</td>
-        <td>${fmtNum(r.volume_max)}</td>
-        <td>${range}</td>
-        <td>${yesPct === null ? "–" : fmtPct(yesPct)}</td>`;
-      tbody.appendChild(tr);
+    const grid = el("div", { class: "arrow-grid" });
+    last96.forEach((m) => {
+      const up = m.result === "yes";
+      grid.appendChild(el("span", {
+        class: "arrow-cell " + (up ? "up" : "down"),
+        title: `${fmtTime(m.close_time)} · ${fmtUsd(m.strike, 0)} · ${up ? "UP" : "DOWN"}`,
+      }, [up ? "▲" : "▼"]));
     });
-    table.appendChild(tbody);
-    tablePanel.appendChild(el("div", { class: "table-scroll" }, [table]));
+    trackerPanel.appendChild(grid);
+    const ups = last96.filter((m) => m.result === "yes").length;
+    trackerPanel.appendChild(el("div", { class: "hint", style: "margin-top:10px" }, [
+      `${last96.length} shown · ${ups} UP / ${last96.length - ups} DOWN`,
+    ]));
+    if (streak.result) {
+      trackerPanel.appendChild(el("div", {
+        class: "hint", style: "margin-top:4px",
+        html: `<b>Longest streak:</b> ${streak.length} × ${streakLabel} — from <b>${fmtTime(streak.start)}</b> to <b>${fmtTime(streak.end)}</b>, across ${settledChrono.length} settled markets.`,
+      }));
+    }
   }
-  root.appendChild(tablePanel);
+  root.appendChild(trackerPanel);
 }
 
 // ---------- CALCULATOR tab ----------
@@ -528,6 +533,195 @@ function computeDiffSignal(markets, gap, minute, windowMode, direction) {
   return { fired, won };
 }
 
+// ---------- derived trackers (computed in-browser from the shipped timelines,
+// so they work the same whether data.json comes from the worker or aggregate.py,
+// and refresh automatically every load) ----------
+function utcDate(iso) { return iso ? String(iso).slice(0, 10) : "—"; }
+
+// Chronological (oldest→newest) settled list from whatever the API shipped:
+// insight_markets (deepest history) preferred, else recent_markets.
+function settledList(data) {
+  const src = (data.insight_markets && data.insight_markets.length)
+    ? data.insight_markets
+    : (data.recent_markets || []).map((r) => ({
+        ticker: r.ticker, close_time: r.close_time, open_time: r.open_time,
+        strike: r.strike, result: r.result, volume: r.volume_max,
+        timeline: r.prob_timeline || [], diff_timeline: r.diff_timeline || [],
+      }));
+  return src
+    .filter((m) => m.result === "yes" || m.result === "no")
+    .slice()
+    .sort((a, b) => (Date.parse(a.close_time || 0) || 0) - (Date.parse(b.close_time || 0) || 0));
+}
+
+// Longest run of identical results, with the wall-clock span it covered.
+function longestStreak(chrono) {
+  let best = { result: null, length: 0, start: null, end: null };
+  let cur = { result: null, length: 0, start: null, end: null };
+  for (const m of chrono) {
+    if (m.result === cur.result) { cur.length++; cur.end = m.close_time; }
+    else cur = { result: m.result, length: 1, start: m.close_time, end: m.close_time };
+    if (cur.length > best.length) best = { ...cur };
+  }
+  return best;
+}
+
+function nearestDiff(dtl, minute) {
+  let best = null, bestD = Infinity;
+  for (const pt of dtl || []) {
+    const d = Math.abs(pt[0] - minute);
+    if (d < bestD) { bestD = d; best = pt; }
+  }
+  return best ? best[1] : null;
+}
+
+// Golden Rule: qualifies if any diff_timeline sample in the last 3 minutes
+// (minutes_elapsed >= 12) has |BTC − strike| >= $50. Predicted side is the sign
+// of the decisive (latest-qualifying) gap; "correct" if it matches the result.
+function computeGoldenRule(markets) {
+  const q = [];
+  for (const m of markets) {
+    const late = (m.diff_timeline || []).filter((pt) => pt[0] >= 12 && Math.abs(pt[1]) >= 50);
+    if (!late.length) continue;
+    const decisive = late[late.length - 1];
+    const gap = Math.abs(decisive[1]);
+    const predicted = decisive[1] > 0 ? "yes" : "no";
+    q.push({
+      m, date: utcDate(m.close_time), ts: decisive[2] || m.close_time,
+      minute: decisive[0], gap, predicted, result: m.result,
+      correct: m.result === predicted,
+    });
+  }
+  return q;
+}
+
+// Comebacks: one side hit >=85% (or the other <=15%) before the final minute
+// (minutes_elapsed < 14), yet the OPPOSITE side won.
+function computeComebacks(markets) {
+  const out = [];
+  for (const m of markets) {
+    const early = (m.timeline || []).filter((pt) => pt[0] < 14);
+    if (!early.length) continue;
+    let maxYes = -Infinity, maxPt = null, minYes = Infinity, minPt = null;
+    for (const pt of early) {
+      if (pt[1] > maxYes) { maxYes = pt[1]; maxPt = pt; }
+      if (pt[1] < minYes) { minYes = pt[1]; minPt = pt; }
+    }
+    let favored, favoredPct, pt;
+    if (m.result === "no" && maxYes >= 85) { favored = "yes"; favoredPct = maxYes; pt = maxPt; }
+    else if (m.result === "yes" && minYes <= 15) { favored = "no"; favoredPct = 100 - minYes; pt = minPt; }
+    else continue;
+    const dtl = m.diff_timeline || [];
+    out.push({
+      m, date: utcDate(m.close_time), ts: pt[2] || m.close_time,
+      favored, favoredPct, extremeMinute: pt[0],
+      minutesLeft: Math.max(0, +(15 - pt[0]).toFixed(1)),
+      gapAtExtreme: nearestDiff(dtl, pt[0]),
+      gapAtClose: dtl.length ? dtl[dtl.length - 1][1] : null,
+      result: m.result,
+    });
+  }
+  out.sort((a, b) => (Date.parse(b.ts || 0) || 0) - (Date.parse(a.ts || 0) || 0));
+  return out;
+}
+
+function goldenRulePanel(withDiff) {
+  const gr = computeGoldenRule(withDiff);
+  const correct = gr.filter((x) => x.correct).length;
+  const acc = gr.length ? (correct / gr.length) * 100 : null;
+  const smallest = gr.length ? Math.min(...gr.map((x) => x.gap)) : null;
+
+  const panel = el("div", { class: "panel" }, [
+    el("h2", {}, ["Golden Rule Tracker"]),
+    el("div", { class: "desc" }, [
+      "A market qualifies when BTC's gap from the target is ≥ $50 and still holding in the last 3 minutes before close (any diff sample at minute ≥ 12 with |gap| ≥ $50). The predicted side is the gap's direction; it's a hit if that matches the result.",
+    ]),
+  ]);
+
+  if (!gr.length) {
+    panel.appendChild(el("div", { class: "empty-state" }, [
+      `No qualifying markets yet among the ${withDiff.length} with BTC-vs-target gap samples. This fills in as more markets are caught live near close.`,
+    ]));
+    return panel;
+  }
+
+  panel.appendChild(el("div", { class: "tiles" }, [
+    tile("Qualifying markets", String(gr.length), "all-time"),
+    tile("Accuracy", acc === null ? "–" : fmtPct(acc, 1), `${correct} correct of ${gr.length}`, acc >= 50 ? "up" : "down"),
+    tile("Closest call", smallest === null ? "–" : fmtUsd(smallest, 2), "smallest gap that ever qualified"),
+  ]));
+
+  // gap-size distribution
+  const buckets = [["$50–100", 50, 100], ["$100–200", 100, 200], ["$200–400", 200, 400], ["$400+", 400, Infinity]];
+  panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Gap-size distribution"]));
+  panel.appendChild(el("div", { class: "tiles" },
+    buckets.map(([label, lo, hi]) => tile(label, String(gr.filter((x) => x.gap >= lo && x.gap < hi).length), "markets"))
+  ));
+
+  // per-day breakdown
+  const byDay = {};
+  for (const x of gr) { (byDay[x.date] ||= { n: 0, c: 0 }); byDay[x.date].n++; if (x.correct) byDay[x.date].c++; }
+  const days = Object.keys(byDay).sort().reverse();
+  const table = el("table", { class: "data" });
+  table.innerHTML = "<thead><tr><th>Date (UTC)</th><th>Qualifying</th><th>Correct</th><th>Accuracy</th></tr></thead>";
+  const tbody = el("tbody");
+  days.forEach((d) => {
+    const { n, c } = byDay[d];
+    const tr = el("tr");
+    tr.innerHTML = `<td>${d}</td><td>${n}</td><td>${c}</td><td>${fmtPct(c / n * 100, 0)}</td>`;
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Per-day breakdown"]));
+  panel.appendChild(el("div", { class: "table-scroll" }, [table]));
+  return panel;
+}
+
+function comebacksPanel(withTl) {
+  const cb = computeComebacks(withTl);
+  const rate = withTl.length ? (cb.length / withTl.length) * 100 : null;
+
+  const panel = el("div", { class: "panel" }, [
+    el("h2", {}, ["Comebacks Tracker"]),
+    el("div", { class: "desc" }, [
+      "Markets where one side reached ≥ 85% (or the other ≤ 15%) before the final minute, but the opposite side still won. Rate is over the markets that have sampled in-market odds.",
+    ]),
+  ]);
+
+  panel.appendChild(el("div", { class: "tiles" }, [
+    tile("Comebacks", String(cb.length), "all-time"),
+    tile("Rate", rate === null ? "–" : fmtPct(rate, 1), `of ${withTl.length} markets with odds`),
+  ]));
+
+  if (!cb.length) {
+    panel.appendChild(el("div", { class: "empty-state" }, ["No comebacks found yet — no market swung from an ≥85% favorite to a loss."]));
+    return panel;
+  }
+
+  const table = el("table", { class: "data" });
+  table.innerHTML =
+    "<thead><tr><th>When (close)</th><th>Favored</th><th>Peak odds</th><th>Min left</th><th>Gap @ peak</th><th>Gap @ close</th><th>Winner</th></tr></thead>";
+  const tbody = el("tbody");
+  cb.forEach((x) => {
+    const tr = el("tr");
+    const favLabel = x.favored === "yes" ? '<span class="up">UP</span>' : '<span class="down">DOWN</span>';
+    const gapAt = x.gapAtExtreme === null ? "–" : (x.gapAtExtreme >= 0 ? "+" : "") + fmtUsd(x.gapAtExtreme, 0);
+    const gapClose = x.gapAtClose === null ? "–" : (x.gapAtClose >= 0 ? "+" : "") + fmtUsd(x.gapAtClose, 0);
+    tr.innerHTML =
+      `<td>${fmtTime(x.m.close_time)}</td>` +
+      `<td>${favLabel}</td>` +
+      `<td>${fmtPct(x.favoredPct, 0)}</td>` +
+      `<td>${x.minutesLeft}</td>` +
+      `<td>${gapAt}</td>` +
+      `<td>${gapClose}</td>` +
+      `<td>${resultBadge(x.result)}</td>`;
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  panel.appendChild(el("div", { class: "table-scroll" }, [table]));
+  return panel;
+}
+
 function renderInsights(root, data) {
   const markets = (data.insight_markets && data.insight_markets.length
     ? data.insight_markets
@@ -548,6 +742,10 @@ function renderInsights(root, data) {
       `Odds and price are sampled about every 2 minutes by the collector while GitHub Actions publishes updates roughly every 5 minutes, so each 15-minute market usually has 6–8 readings — patterns get sharper as more data accumulates.`,
     ]),
   ]));
+
+  // --- headline trackers (auto-computed from timelines) ---
+  root.appendChild(goldenRulePanel(withDiff));
+  root.appendChild(comebacksPanel(withTl));
 
   // --- interactive explorer ---
   const thrInput = el("input", { type: "range", min: "50", max: "95", step: "1", value: "58" });
@@ -633,11 +831,6 @@ function renderInsights(root, data) {
   // --- auto headline stats ---
   const stat = (arr, pred) => arr.filter(pred).length;
 
-  const comebackBase = withTl.filter((m) => Math.min(...m.timeline.map((p) => p[1])) <= 30);
-  const comebacks = stat(comebackBase, (m) => m.result === "yes");
-  const collapseBase = withTl.filter((m) => Math.max(...m.timeline.map((p) => p[1])) >= 70);
-  const collapses = stat(collapseBase, (m) => m.result === "no");
-
   const last10 = markets.slice(0, 10);
   const last10Up = stat(last10, (m) => m.result === "yes");
 
@@ -657,8 +850,6 @@ function renderInsights(root, data) {
   root.appendChild(el("div", { class: "panel" }, [
     el("h2", {}, ["Auto Insights"]),
     el("div", { class: "tiles" }, [
-      tile("Comebacks to UP", comebackBase.length ? `${comebacks} of ${comebackBase.length}` : "–", "dipped to ≤30% but finished UP"),
-      tile("Collapses to DOWN", collapseBase.length ? `${collapses} of ${collapseBase.length}` : "–", "reached ≥70% but finished DOWN"),
       tile("Last 10 markets", last10.length ? `${last10Up} UP / ${last10.length - last10Up} DOWN` : "–"),
       tile("Biggest odds swing", biggestSwing ? fmtPct(biggestSwing.swing, 0) : "–", biggestSwing ? `market closed ${fmtTime(biggestSwing.m.close_time)}` : "needs ≥2 samples per market"),
       tile("Avg last-sample odds, UP winners", avgLast(yesFinishers) === null ? "–" : fmtPct(avgLast(yesFinishers), 0)),
@@ -679,7 +870,7 @@ function renderInsights(root, data) {
 }
 
 // ---------- tabs ----------
-// Tab names are read from the DOM so self-contained tabs (compare, export) are
+// Tab names are read from the DOM so self-contained tabs (export) are
 // covered automatically, and activateTab is authoritative over EVERY panel --
 // switching away from any tab hides it, with no hardcoded list to keep in sync.
 const DEFAULT_TAB = "live";
