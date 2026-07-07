@@ -407,6 +407,9 @@ footer a { color: var(--text-secondary); }
 .vol-flagged-row td { background: rgba(237, 161, 0, 0.10); }
 .vol-today td { font-weight: 600; }
 
+/* --- golden rule v2 (Insights) --- */
+.cr-flagged-row td { background: rgba(208, 130, 30, 0.14); }
+
 /* --- export --- */
 .export-specific { margin: 4px 0 12px; }
 .export-multiselect {
