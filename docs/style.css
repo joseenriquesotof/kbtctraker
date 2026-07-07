@@ -409,6 +409,21 @@ footer a { color: var(--text-secondary); }
 
 /* --- golden rule v2 (Insights) --- */
 .cr-flagged-row td { background: rgba(208, 130, 30, 0.14); }
+.worst-case-rect {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 14px;
+  background: var(--page);
+}
+.worst-case-rect h2 {
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+.wc-note {
+  color: var(--text-muted);
+  font-size: 11px;
+}
 
 /* --- export --- */
 .export-specific { margin: 4px 0 12px; }
