@@ -209,15 +209,6 @@ table.data th {
   text-align: center;
 }
 
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-@media (max-width: 760px) {
-  .grid-2 { grid-template-columns: 1fr; }
-}
-
 footer {
   color: var(--text-muted);
   font-size: 12px;
@@ -407,23 +398,21 @@ footer a { color: var(--text-secondary); }
 .vol-flagged-row td { background: rgba(237, 161, 0, 0.10); }
 .vol-today td { font-weight: 600; }
 
-/* --- golden rule v2 (Insights) --- */
-.cr-flagged-row td { background: rgba(208, 130, 30, 0.14); }
-.worst-case-rect {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 16px;
-  margin-top: 14px;
-  background: var(--page);
+/* Compact variant: smaller tiles/table so the section takes noticeably less
+   space than the dashboard's other panels. */
+.vol-compact.panel { padding: 12px 14px; }
+.vol-compact .desc { font-size: 11px; margin-bottom: 8px; }
+.vol-compact-tiles { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.vol-compact-tiles .tile,
+.vol-compact table.data { font-size: 12px; }
+.vol-compact .tile {
+  padding: 8px 10px;
 }
-.worst-case-rect h2 {
-  font-size: 13px;
-  margin: 0 0 8px;
-}
-.wc-note {
-  color: var(--text-muted);
-  font-size: 11px;
-}
+.vol-compact .tile .label { font-size: 11px; margin-bottom: 3px; }
+.vol-compact .tile .value { font-size: 16px; }
+.vol-compact .tile .sub { font-size: 10px; }
+.vol-compact table.data th,
+.vol-compact table.data td { padding: 5px 8px; }
 
 /* --- export --- */
 .export-specific { margin: 4px 0 12px; }

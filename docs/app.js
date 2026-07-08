@@ -262,32 +262,9 @@ function renderLive(root, data) {
     }),
   ]));
 
-  // YES/NO bid chart (falls back to mid-probability for old data.json files)
-  const hasBids = (s.yes_bid_pct || []).some((v) => v !== null && v !== undefined);
-  const probSeries = hasBids
-    ? [
-        { name: "YES bid", color: "var(--series-blue)", points: s.yes_bid_pct || [] },
-        { name: "NO bid", color: "var(--series-red)", points: s.no_bid_pct || [] },
-      ]
-    : [{ name: "YES probability", color: "var(--series-blue)", points: s.yes_prob_pct || [] }];
-
-  const grid2 = el("div", { class: "grid-2" });
-  grid2.appendChild(el("div", { class: "panel" }, [
-    el("h2", {}, ["YES bid vs. NO bid"]),
-    el("div", { class: "desc" }, ["Best bid on each side of the live contract, in cents (= implied %). When YES bid + NO bid stays far below 100¢, a both-sides play may exist — check the Calculator tab."]),
-    legend(hasBids ? [
-      { color: "var(--series-blue)", label: "YES bid (¢)" },
-      { color: "var(--series-red)", label: "NO bid (¢)" },
-    ] : [{ color: "var(--series-blue)", label: "YES probability (%)" }]),
-    lineChart({
-      timestamps,
-      series: probSeries,
-      refLines: [{ value: 50, label: "50" }],
-      yFormat: (v) => fmtPct(v),
-      yTickFormat: (v) => Math.round(v) + "",
-    }),
-  ]));
-  grid2.appendChild(el("div", { class: "panel" }, [
+  // Yes-bid/no-bid chart removed: that feed was never reliable (values always
+  // 0/100/null), so BTC Volatility now stands alone full-width.
+  root.appendChild(el("div", { class: "panel" }, [
     el("h2", {}, ["BTC Volatility"]),
     el("div", { class: "desc" }, ["Rolling stdev of 5-min log returns (%) — higher means faster, choppier price moves."]),
     legend([{ color: "var(--series-blue)", label: "Rolling stdev (%)" }]),
@@ -298,7 +275,6 @@ function renderLive(root, data) {
       yTickFormat: (v) => v.toFixed(3) + "%",
     }),
   ]));
-  root.appendChild(grid2);
 
   const volumeItems = (data.recent_markets || []).slice(0, 20).reverse().map((r) => ({
     label: `${fmtTime(r.close_time)} · ${fmtUsd(r.strike, 0)} · ${r.result === "yes" ? "UP" : "DOWN"}`,
@@ -600,8 +576,7 @@ function computeGoldenRule(markets) {
 // into exactly one tier based on how many samples landed in the window and
 // whether they agree, so a lone sample near a ~2-min polling gap (unconfirmed
 // but not wrong) is told apart from a gap that genuinely failed to hold
-// (a real reversal). v1 is untouched -- this is a separate, additive pass.
-const CR_FLAG_MAX = 0.5; // closing_ratio below this is flagged (orange)
+// (a real reversal).
 
 function windowSamplesOf(m) {
   return (m.diff_timeline || []).filter((pt) => pt[0] >= 12);
@@ -613,6 +588,18 @@ function windowSamplesOf(m) {
 function closingRatioFrom(triggerValue, dtl) {
   if (!dtl.length || !triggerValue) return null;
   return dtl[dtl.length - 1][1] / triggerValue;
+}
+
+// v1's own trigger is the first sample in the window that ITSELF qualifies
+// (abs>=50) -- not just the first window sample, which for a market v1 only
+// counts via a later sample (e.g. a "rejected"-tier window like [30, 80])
+// could be under $50 and would misrepresent the trigger. Returns [trigger,
+// final] (final = last sample in the whole diff_timeline, regardless of tier).
+function v1TriggerAndFinal(m) {
+  const late = (m.diff_timeline || []).filter((pt) => pt[0] >= 12 && Math.abs(pt[1]) >= 50);
+  if (!late.length) return [null, null];
+  const dtl = m.diff_timeline || [];
+  return [late[0][1], dtl.length ? dtl[dtl.length - 1][1] : null];
 }
 
 function computeGoldenRuleV2(markets) {
@@ -665,188 +652,6 @@ function computeGoldenRuleV2(markets) {
     out[tier].push(rec);
   }
   return out;
-}
-
-const CR_BUCKETS = [
-  ["< 0 (reversed)", -Infinity, 0],
-  ["0.0 – 0.5 ⚠", 0, CR_FLAG_MAX],
-  ["0.5 – 0.8", CR_FLAG_MAX, 0.8],
-  ["0.8 – 1.0", 0.8, 1.0],
-  ["≥ 1.0 (held/grew)", 1.0, Infinity],
-];
-
-function crStats(ratios) {
-  const valid = ratios.filter((r) => r !== null && r !== undefined && Number.isFinite(r));
-  return {
-    avg: valid.length ? valid.reduce((a, b) => a + b, 0) / valid.length : null,
-    n: valid.length,
-    buckets: CR_BUCKETS.map(([label, lo, hi]) => ({
-      label, count: valid.filter((r) => r >= lo && r < hi).length,
-    })),
-  };
-}
-
-function goldenRuleV2Panel(withDiff) {
-  const v1 = computeGoldenRule(withDiff); // recomputed here only -- v1 itself is untouched
-  const v2 = computeGoldenRuleV2(withDiff);
-  const v2Qualifying = [...v2.confirmed, ...v2.single_reading];
-  const v2Correct = v2Qualifying.filter((x) => x.correct).length;
-  const v1Correct = v1.filter((x) => x.correct).length;
-
-  const panel = el("div", { class: "panel" }, [
-    el("h2", {}, ["Golden Rule v2 — Confirmed vs. Single-Reading vs. Rejected"]),
-    el("div", { class: "desc" }, [
-      "v1 (above) fires on any single qualifying sample in the last 3 minutes. v2 checks whether the ~2-minute polling cadence actually caught enough of the window to trust it: ",
-      el("b", {}, ["confirmed"]), " — 2+ samples in the window, all ≥$50 the same direction. ",
-      el("b", {}, ["single-reading"]), " — only 1 sample landed in the window (a polling gap, not a weak signal — still ≥$50). ",
-      el("b", {}, ["rejected"]), " — 2+ samples exist but they disagree or one fell under $50: the gap genuinely didn't hold, so these are excluded from v2's qualifying pool.",
-    ]),
-  ]);
-
-  if (!v1.length && !v2Qualifying.length && !v2.rejected.length) {
-    panel.appendChild(el("div", { class: "empty-state" }, [
-      "No v1 or v2 activity yet — this fills in as markets are caught live near close.",
-    ]));
-    return panel;
-  }
-
-  // --- v1 vs v2 vs combined, side by side ---
-  // v2Qualifying is always a subset of v1 (confirmed/single-reading both require
-  // at least one in-window sample >=$50, which alone satisfies v1's own "any
-  // qualifying sample" rule) -- so the deduped union can, in general, still pick
-  // up "rejected" markets that separately happen to have a v1-qualifying sample.
-  // Computed as a real dedup (not assumed equal to v1) so this stays correct if
-  // either rule's definition changes later.
-  const combinedByKey = new Map();
-  for (const x of v1) combinedByKey.set(marketKey(x.m), x);
-  for (const x of v2Qualifying) if (!combinedByKey.has(marketKey(x.m))) combinedByKey.set(marketKey(x.m), x);
-  const combined = Array.from(combinedByKey.values());
-  const combinedCorrect = combined.filter((x) => x.correct).length;
-
-  panel.appendChild(el("div", { class: "tiles" }, [
-    tile("v1 qualifying", String(v1.length), "any single ≥$50 sample"),
-    tile("v1 accuracy", v1.length ? fmtPct(v1Correct / v1.length * 100, 1) : "–", `${v1Correct} correct of ${v1.length}`),
-    tile("v2 qualifying", String(v2Qualifying.length), "confirmed + single-reading"),
-    tile("v2 accuracy", v2Qualifying.length ? fmtPct(v2Correct / v2Qualifying.length * 100, 1) : "–", `${v2Correct} correct of ${v2Qualifying.length}`),
-    tile("v1 + v2 combined", String(combined.length), "deduped — same market counted once", "", "Union of v1's qualifying markets and v2's confirmed+single-reading markets, deduped by market. Since v2's qualifying pool is always contained in v1's, this number is currently identical to v1's own count."),
-    tile("Combined accuracy", combined.length ? fmtPct(combinedCorrect / combined.length * 100, 1) : "–", `${combinedCorrect} correct of ${combined.length}`),
-  ]));
-
-  // --- per-tier breakdown ---
-  const tierRow = (label, list, note, titleAttr) => {
-    const c = list.filter((x) => x.correct).length;
-    return tile(label, String(list.length), list.length ? `${fmtPct(c / list.length * 100, 0)} accurate — ${note}` : note, "", titleAttr);
-  };
-  panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["v2 by tier"]));
-  panel.appendChild(el("div", { class: "tiles" }, [
-    tierRow("Confirmed", v2.confirmed, "high confidence"),
-    tierRow("Single-reading", v2.single_reading, "polling gap, not a weak signal"),
-    tierRow(
-      "Rejected", v2.rejected, "a real reversal, not a data gap",
-      "The gap reached $50+ at some point in the final 3 minutes, but a later reading in that same window showed it had dropped back below $50 (or flipped direction) — the signal didn't hold, so no bet would have been placed. Excluded from v2's qualifying pool."
-    ),
-  ]));
-  panel.appendChild(el("div", { class: "hint" }, [
-    el("b", {}, ["Single-reading"]), " markets are lower-confidence only because a ~2-minute poll may have missed a confirming second sample in the 3-minute window — the trigger itself is just as real as a confirmed one. ",
-    el("b", {}, ["Rejected"]), " markets are the opposite: the window was sampled well enough (2+ readings), and the gap genuinely failed to hold through to close — a real reversal signal, not a missed reading.",
-  ]));
-
-  // --- closing_ratio: v1 vs v2, plus $ / % framing for v2 ---
-  // v1's own trigger is the first sample in the window that ITSELF qualifies
-  // (abs>=50) -- not just the first window sample, which for a market v1 only
-  // counts via a later sample (e.g. a "rejected"-tier window like [30, 80])
-  // could be under $50 and would misrepresent the trigger.
-  function v1TriggerAndFinal(m) {
-    const late = (m.diff_timeline || []).filter((pt) => pt[0] >= 12 && Math.abs(pt[1]) >= 50);
-    if (!late.length) return [null, null];
-    const dtl = m.diff_timeline || [];
-    return [late[0][1], dtl.length ? dtl[dtl.length - 1][1] : null];
-  }
-  const v1TF = v1.map((x) => v1TriggerAndFinal(x.m));
-  const v1Ratios = v1TF.map(([trig, fin]) => (trig && fin !== null ? fin / trig : null));
-  const v2Ratios = v2Qualifying.map((x) => x.closingRatio);
-  const v1Cr = crStats(v1Ratios);
-  const v2Cr = crStats(v2Ratios);
-  const shrinks = v2Qualifying.map((x) => x.dollarShrink).filter((v) => v !== null && v !== undefined && Number.isFinite(v));
-  const retained = v2Qualifying.map((x) => x.pctRetained).filter((v) => v !== null && v !== undefined && Number.isFinite(v));
-  const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null);
-  const avgShrink = avg(shrinks);
-  const avgRetained = avg(retained);
-
-  panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Closing ratio — how much the gap held (v1 vs. v2)"]));
-  panel.appendChild(el("div", { class: "desc" }, [
-    "closing_ratio = (last diff_timeline sample) ÷ (the sample that first triggered the rule) — i.e. % of the gap still there by close. Below 1.0 means the gap shrank before close; below " + CR_FLAG_MAX + " (⚠) is flagged as a weak finish.",
-  ]));
-  panel.appendChild(el("div", { class: "tiles" }, [
-    tile("v1 avg closing ratio", v1Cr.avg === null ? "–" : v1Cr.avg.toFixed(2) + "×", `${v1Cr.n} markets`),
-    tile("v2 avg closing ratio", v2Cr.avg === null ? "–" : v2Cr.avg.toFixed(2) + "×", `${v2Cr.n} markets`),
-    tile("v2 avg $ shrink", avgShrink === null ? "–" : fmtUsd(avgShrink, 0), "confirmed + single-reading"),
-    tile("v2 avg % of gap retained", avgRetained === null ? "–" : fmtPct(avgRetained, 0), "confirmed + single-reading"),
-  ]));
-
-  const crTable = el("table", { class: "data" });
-  crTable.innerHTML = "<thead><tr><th>Closing ratio</th><th>v1 count</th><th>v2 count</th></tr></thead>";
-  const crBody = el("tbody");
-  CR_BUCKETS.forEach((_, i) => {
-    const tr = el("tr");
-    tr.innerHTML = `<td>${v1Cr.buckets[i].label}</td><td>${v1Cr.buckets[i].count}</td><td>${v2Cr.buckets[i].count}</td>`;
-    crBody.appendChild(tr);
-  });
-  crTable.appendChild(crBody);
-  panel.appendChild(el("div", { class: "table-scroll" }, [crTable]));
-
-  // --- worst cases: last 24h top-3, plus the all-time worst as a footnote ---
-  // trigger/final are stored directly on the tagged entry (not nested under
-  // .x) so v1 and v2 entries -- whose underlying records have different
-  // field names -- render through one uniform path.
-  const tagged = [
-    ...v1.map((x, i) => ({ x, ratio: v1Ratios[i], version: "v1", trigger: v1TF[i][0], final: v1TF[i][1] })),
-    ...v2Qualifying.map((x) => ({ x, ratio: x.closingRatio, version: `v2 (${x.tier.replace("_", "-")})`, trigger: x.triggerValue, final: x.finalValue })),
-  ].filter((t) => t.ratio !== null && t.ratio !== undefined && Number.isFinite(t.ratio));
-
-  if (tagged.length) {
-    const cutoff = Date.now() - 24 * 3600 * 1000;
-    const recent = tagged.filter((t) => (Date.parse(t.x.m.close_time || 0) || 0) >= cutoff);
-    const worst24 = recent.slice().sort((a, b) => a.ratio - b.ratio).slice(0, 3);
-    const allTimeWorst = tagged.reduce((a, b) => (b.ratio < a.ratio ? b : a));
-
-    const rect = el("div", { class: "worst-case-rect" }, [
-      el("h2", {}, ["Worst Closing Ratios — Last 24 Hours"]),
-    ]);
-
-    if (!worst24.length) {
-      rect.appendChild(el("div", { class: "empty-state" }, ["No v1/v2 qualifying markets with a closing ratio in the last 24 hours."]));
-    } else {
-      const wTable = el("table", { class: "data" });
-      wTable.innerHTML = "<thead><tr><th>Market (close)</th><th>Trigger</th><th>Final</th><th>Shrink</th></tr></thead>";
-      const wBody = el("tbody");
-      worst24.forEach((t) => {
-        const tr = el("tr");
-        if (t.ratio < CR_FLAG_MAX) tr.className = "cr-flagged-row";
-        tr.innerHTML =
-          `<td>${fmtTime(t.x.m.close_time)} <span class="wc-note">${t.version}</span></td>` +
-          `<td>${fmtUsd(t.trigger, 0)} <span class="wc-note">(100%)</span></td>` +
-          `<td>${t.final === null ? "–" : fmtUsd(t.final, 0)} <span class="wc-note">(${Math.round(t.ratio * 100)}%)</span></td>` +
-          `<td>${t.final === null ? "–" : fmtUsd(t.trigger - t.final, 0)} <span class="wc-note">(${Math.round((1 - t.ratio) * 100)} pts)</span></td>`;
-        wBody.appendChild(tr);
-      });
-      wTable.appendChild(wBody);
-      rect.appendChild(el("div", { class: "table-scroll" }, [wTable]));
-    }
-
-    rect.appendChild(el("div", { class: "hint", style: "margin-top:10px" }, [
-      `All-time worst: `,
-      el("b", {}, [fmtTime(allTimeWorst.x.m.close_time)]),
-      ` · `, el("b", {}, [allTimeWorst.version]),
-      ` predicted ${allTimeWorst.x.predicted === "yes" ? "UP" : "DOWN"}, settled ${allTimeWorst.x.result === "yes" ? "UP" : "DOWN"} · closing ratio `,
-      el("b", {}, [allTimeWorst.ratio.toFixed(2) + "×"]),
-      ` (${allTimeWorst.ratio < 0 ? "flipped to the opposite sign" : Math.round(allTimeWorst.ratio * 100) + "% of trigger value retained"}).`,
-    ]));
-
-    panel.appendChild(rect);
-  }
-
-  return panel;
 }
 
 // Comebacks: one side hit >=85% (or the other <=15%) before the final minute
@@ -965,10 +770,10 @@ function fmtRatio(v) {
 
 function volatilityPanel(volMetrics) {
   const all = Array.from(volMetrics.values());
-  const panel = el("div", { class: "panel" }, [
+  const panel = el("div", { class: "panel vol-compact" }, [
     el("h2", {}, ["Volatility"]),
     el("div", { class: "desc" }, [
-      "Per-market movement computed from the sampled timelines: price_range = span of BTC-vs-target movement ($); flips = favored-side changes (50% crossings); swings = every direction reversal in the odds path; vol_ratio = this market's price_range vs the average of the trailing 20 prior markets. ⚡ marks vol_ratio > 2.5× — an unusually large move vs recent baseline.",
+      "price_range = $ span of BTC-vs-target movement; vol_ratio = this market's range vs the trailing-20 average. ⚡ = vol_ratio > 2.5×.",
     ]),
   ]);
 
@@ -989,15 +794,16 @@ function volatilityPanel(volMetrics) {
   const allRange = avg(withRange, (x) => x.priceRange);
   const flaggedCount = all.filter((x) => x.flagged).length;
 
-  panel.appendChild(el("div", { class: "tiles" }, [
-    tile("Today's avg price range", todayRange === null ? "–" : fmtUsd(todayRange, 0),
-      allRange === null ? "" : `all-time avg ${fmtUsd(allRange, 0)}`),
-    tile("Today's avg vol ratio", todayRatio === null ? "–" : fmtRatio(todayRatio),
-      "1.00× = same as recent normal", todayRatio !== null && todayRatio > 1.5 ? "down" : undefined),
-    tile("⚡ Unusual moves", String(flaggedCount), `vol_ratio > ${VOL_FLAG_RATIO}× all-time`),
+  panel.appendChild(el("div", { class: "tiles vol-compact-tiles" }, [
+    tile("Today's avg range", todayRange === null ? "–" : fmtUsd(todayRange, 0),
+      allRange === null ? "" : `all-time ${fmtUsd(allRange, 0)}`),
+    tile("Today's avg ratio", todayRatio === null ? "–" : fmtRatio(todayRatio),
+      "1.00× = normal", todayRatio !== null && todayRatio > 1.5 ? "down" : undefined),
+    tile("⚡ Unusual", String(flaggedCount), `> ${VOL_FLAG_RATIO}× all-time`),
   ]));
 
-  // --- daily averages table ---
+  // --- daily averages table (trailing 14 days, so this stays compact as
+  // history grows) ---
   const byDay = {};
   for (const x of all) {
     const d = (byDay[x.date] ||= { ranges: [], ratios: [], n: 0, flagged: 0 });
@@ -1006,7 +812,7 @@ function volatilityPanel(volMetrics) {
     if (x.volRatio !== null) d.ratios.push(x.volRatio);
     if (x.flagged) d.flagged++;
   }
-  const days = Object.keys(byDay).sort().reverse();
+  const days = Object.keys(byDay).sort().reverse().slice(0, 14);
   const dayTable = el("table", { class: "data" });
   dayTable.innerHTML = "<thead><tr><th>Date (UTC)</th><th>Markets</th><th>Avg price range</th><th>Avg vol ratio</th><th>⚡ flagged</th></tr></thead>";
   const dayBody = el("tbody");
@@ -1030,7 +836,7 @@ function volatilityPanel(volMetrics) {
   const whipsaw = all
     .filter((x) => x.probSamples >= 2)
     .sort((a, b) => (b.swingCount - a.swingCount) || (b.flipCount - a.flipCount) || ((b.volRatio || 0) - (a.volRatio || 0)))
-    .slice(0, 10);
+    .slice(0, 5);
   const wsTable = el("table", { class: "data" });
   wsTable.innerHTML = "<thead><tr><th>Market (close)</th><th>Swings</th><th>Flips</th><th>Price range</th><th>Vol ratio</th><th>Result</th></tr></thead>";
   const wsBody = el("tbody");
@@ -1191,55 +997,152 @@ function volGaugeBlock(volMetrics) {
   return block;
 }
 
+// ---------- Golden Rule: unified v1/v2/combined panel ----------
+// One rule registry, keyed by mode id -> { label, list }. "list" is always a
+// unified per-market record: { m, date, predicted, result, correct, gap,
+// triggerValue, finalValue, closingRatio, dollarShrink, pctRetained }. Adding
+// a future v3 (or v4...) is just one more entry here -- the toggle and the
+// rendering below iterate the registry generically, nothing is hardcoded to
+// two options.
+function toUnifiedV1(x) {
+  const [trigger, final] = v1TriggerAndFinal(x.m);
+  const closingRatio = trigger && final !== null ? final / trigger : null;
+  return {
+    m: x.m, date: x.date, predicted: x.predicted, result: x.result, correct: x.correct,
+    gap: x.gap, triggerValue: trigger, finalValue: final, closingRatio,
+    dollarShrink: trigger !== null && final !== null ? trigger - final : null,
+    pctRetained: closingRatio !== null ? closingRatio * 100 : null,
+  };
+}
+
+function toUnifiedV2(x) {
+  return {
+    m: x.m, date: x.date, predicted: x.predicted, result: x.result, correct: x.correct,
+    gap: Math.abs(x.triggerValue), triggerValue: x.triggerValue, finalValue: x.finalValue,
+    closingRatio: x.closingRatio, dollarShrink: x.dollarShrink, pctRetained: x.pctRetained,
+  };
+}
+
+function buildGoldenRuleModes(withDiff) {
+  const v1List = computeGoldenRule(withDiff).map(toUnifiedV1);
+  const v2tiers = computeGoldenRuleV2(withDiff);
+  const v2List = [...v2tiers.confirmed, ...v2tiers.single_reading].map(toUnifiedV2);
+
+  // v2's qualifying pool (confirmed + single-reading) always requires at
+  // least one in-window sample >=$50, which alone already satisfies v1's own
+  // "any qualifying sample" rule -- so v2's pool is always contained in v1's.
+  // The union below is a real dedup (not assumed equal) so it stays correct
+  // if either rule's definition changes; today it will exactly match v1.
+  const combinedByKey = new Map();
+  for (const x of v1List) combinedByKey.set(marketKey(x.m), x);
+  for (const x of v2List) if (!combinedByKey.has(marketKey(x.m))) combinedByKey.set(marketKey(x.m), x);
+
+  return {
+    v1: { label: "v1", list: v1List, desc: "A market qualifies when BTC's gap from the target is ≥ $50 and still holding in the last 3 minutes before close (any diff sample at minute ≥ 12 with |gap| ≥ $50). The predicted side is the gap's direction; it's a hit if that matches the result." },
+    v2: { label: "v2", list: v2List, desc: "Same last-3-minute window as v1, but only counts a market when the polling actually confirmed it: 2+ samples all ≥$50 the same direction, or a single ≥$50 reading when the window only caught one sample. Markets where the gap disagreed or dropped under $50 are excluded." },
+    both: { label: "Both combined", list: Array.from(combinedByKey.values()), desc: "The deduped union of v1's and v2's qualifying markets, each counted once. Since v2's pool is always contained in v1's, this currently matches v1's own numbers exactly." },
+  };
+}
+
+let goldenRuleMode = "v1"; // persists across the 60s tab refresh so the toggle doesn't reset
+
 function goldenRulePanel(withDiff) {
-  const gr = computeGoldenRule(withDiff);
-  const correct = gr.filter((x) => x.correct).length;
-  const acc = gr.length ? (correct / gr.length) * 100 : null;
-  const smallest = gr.length ? Math.min(...gr.map((x) => x.gap)) : null;
+  const modes = buildGoldenRuleModes(withDiff);
+  if (!modes[goldenRuleMode]) goldenRuleMode = "v1";
 
-  const panel = el("div", { class: "panel" }, [
-    el("h2", {}, ["Golden Rule Tracker"]),
-    el("div", { class: "desc" }, [
-      "A market qualifies when BTC's gap from the target is ≥ $50 and still holding in the last 3 minutes before close (any diff sample at minute ≥ 12 with |gap| ≥ $50). The predicted side is the gap's direction; it's a hit if that matches the result.",
-    ]),
-  ]);
+  const panel = el("div", { class: "panel" });
+  const heading = el("h2", {}, ["Golden Rule Tracker"]);
+  const modeRow = el("div", { class: "outcome-buttons" });
+  const desc = el("div", { class: "desc" });
+  const content = el("div");
+  panel.append(heading, modeRow, desc, content);
 
-  if (!gr.length) {
-    panel.appendChild(el("div", { class: "empty-state" }, [
-      `No qualifying markets yet among the ${withDiff.length} with BTC-vs-target gap samples. This fills in as more markets are caught live near close.`,
-    ]));
-    return panel;
+  function renderModeButtons() {
+    modeRow.replaceChildren(
+      ...Object.entries(modes).map(([key, def]) => {
+        const btn = el("button", { class: "btn outcome" + (key === goldenRuleMode ? " active" : ""), type: "button" }, [def.label]);
+        btn.addEventListener("click", () => {
+          goldenRuleMode = key;
+          renderModeButtons();
+          renderContent();
+        });
+        return btn;
+      })
+    );
   }
 
-  panel.appendChild(el("div", { class: "tiles" }, [
-    tile("Qualifying markets", String(gr.length), "all-time"),
-    tile("Accuracy", acc === null ? "–" : fmtPct(acc, 1), `${correct} correct of ${gr.length}`, acc >= 50 ? "up" : "down"),
-    tile("Closest call", smallest === null ? "–" : fmtUsd(smallest, 2), "smallest gap that ever qualified"),
-  ]));
+  function renderContent() {
+    const active = modes[goldenRuleMode];
+    desc.textContent = active.desc;
+    const list = active.list;
 
-  // gap-size distribution
-  const buckets = [["$50–100", 50, 100], ["$100–200", 100, 200], ["$200–400", 200, 400], ["$400+", 400, Infinity]];
-  panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Gap-size distribution"]));
-  panel.appendChild(el("div", { class: "tiles" },
-    buckets.map(([label, lo, hi]) => tile(label, String(gr.filter((x) => x.gap >= lo && x.gap < hi).length), "markets"))
-  ));
+    if (!list.length) {
+      content.replaceChildren(el("div", { class: "empty-state" }, [
+        `No qualifying markets yet for this rule among the ${withDiff.length} markets with BTC-vs-target gap samples. This fills in as more markets are caught live near close.`,
+      ]));
+      return;
+    }
 
-  // per-day breakdown
-  const byDay = {};
-  for (const x of gr) { (byDay[x.date] ||= { n: 0, c: 0 }); byDay[x.date].n++; if (x.correct) byDay[x.date].c++; }
-  const days = Object.keys(byDay).sort().reverse();
-  const table = el("table", { class: "data" });
-  table.innerHTML = "<thead><tr><th>Date (UTC)</th><th>Qualifying</th><th>Correct</th><th>Accuracy</th></tr></thead>";
-  const tbody = el("tbody");
-  days.forEach((d) => {
-    const { n, c } = byDay[d];
-    const tr = el("tr");
-    tr.innerHTML = `<td>${d}</td><td>${n}</td><td>${c}</td><td>${fmtPct(c / n * 100, 0)}</td>`;
-    tbody.appendChild(tr);
-  });
-  table.appendChild(tbody);
-  panel.appendChild(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Per-day breakdown"]));
-  panel.appendChild(el("div", { class: "table-scroll" }, [table]));
+    const nodes = [];
+    const correct = list.filter((x) => x.correct).length;
+    const acc = (correct / list.length) * 100;
+    const gaps = list.map((x) => x.gap).filter((g) => g !== null && g !== undefined && Number.isFinite(g));
+    const closest = gaps.length ? Math.min(...gaps) : null;
+    const shrinks = list.map((x) => x.dollarShrink).filter((v) => v !== null && v !== undefined && Number.isFinite(v));
+    const retained = list.map((x) => x.pctRetained).filter((v) => v !== null && v !== undefined && Number.isFinite(v));
+    const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null);
+
+    nodes.push(el("div", { class: "tiles" }, [
+      tile("Qualifying markets", String(list.length), "all-time"),
+      tile("Accuracy", fmtPct(acc, 1), `${correct} correct of ${list.length}`, acc >= 50 ? "up" : "down"),
+      tile("Closest call", closest === null ? "–" : fmtUsd(closest, 2), "smallest qualifying gap ever"),
+      tile("Avg $ shrink", avg(shrinks) === null ? "–" : fmtUsd(avg(shrinks), 0), "trigger → final, per market"),
+      tile("Avg % gap retained", avg(retained) === null ? "–" : fmtPct(avg(retained), 0), "of the trigger value, by close"),
+    ]));
+
+    // Biggest shrink today -- the plain-language, at-a-glance replacement for
+    // a bare closing_ratio: shown as a $ drop plus what % of the gap survived.
+    const today = utcDate(new Date().toISOString());
+    const todays = list.filter((x) => x.date === today && x.dollarShrink !== null && Number.isFinite(x.dollarShrink));
+    if (todays.length) {
+      const biggest = todays.reduce((a, b) => (b.dollarShrink > a.dollarShrink ? b : a));
+      nodes.push(el("div", { class: "hint", style: "margin:2px 0 10px" }, [
+        `Biggest shrink today: `, el("b", {}, [fmtUsd(biggest.dollarShrink, 0)]),
+        ` — retained ${biggest.pctRetained === null ? "–" : Math.round(biggest.pctRetained) + "%"} of the gap by close (${fmtTime(biggest.m.close_time)}).`,
+      ]));
+    } else {
+      nodes.push(el("div", { class: "hint", style: "margin:2px 0 10px" }, ["No qualifying markets have closed yet today (UTC)."]));
+    }
+
+    // gap-size distribution
+    const buckets = [["$50–100", 50, 100], ["$100–200", 100, 200], ["$200–400", 200, 400], ["$400+", 400, Infinity]];
+    nodes.push(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Gap-size distribution"]));
+    nodes.push(el("div", { class: "tiles" },
+      buckets.map(([label, lo, hi]) => tile(label, String(gaps.filter((g) => g >= lo && g < hi).length), "markets"))
+    ));
+
+    // per-day breakdown
+    const byDay = {};
+    for (const x of list) { (byDay[x.date] ||= { n: 0, c: 0 }); byDay[x.date].n++; if (x.correct) byDay[x.date].c++; }
+    const days = Object.keys(byDay).sort().reverse();
+    const table = el("table", { class: "data" });
+    table.innerHTML = "<thead><tr><th>Date (UTC)</th><th>Qualifying</th><th>Correct</th><th>Accuracy</th></tr></thead>";
+    const tbody = el("tbody");
+    days.forEach((d) => {
+      const { n, c } = byDay[d];
+      const tr = el("tr");
+      tr.innerHTML = `<td>${d}</td><td>${n}</td><td>${c}</td><td>${fmtPct(c / n * 100, 0)}</td>`;
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    nodes.push(el("h2", { style: "font-size:13px;margin:14px 0 4px" }, ["Per-day breakdown"]));
+    nodes.push(el("div", { class: "table-scroll" }, [table]));
+
+    content.replaceChildren(...nodes);
+  }
+
+  renderModeButtons();
+  renderContent();
   return panel;
 }
 
@@ -1317,7 +1220,6 @@ function renderInsights(root, data) {
   // --- headline trackers (auto-computed from timelines) ---
   const volMetrics = computeVolMetrics(data);
   root.appendChild(goldenRulePanel(withDiff));
-  root.appendChild(goldenRuleV2Panel(withDiff));
   root.appendChild(comebacksPanel(withTl, volMetrics));
   root.appendChild(volatilityPanel(volMetrics));
 
