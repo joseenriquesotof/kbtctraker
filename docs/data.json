@@ -1,214 +1,741 @@
 {
-  "generated_at": "2026-07-15T00:57:08Z",
+  "generated_at": "2026-07-15T03:55:42Z",
   "series_ticker": "KXBTC15M",
   "current": {
-    "ticker": "KXBTC15M-26JUL142100-00",
-    "event_ticker": "KXBTC15M-26JUL142100",
+    "ticker": "KXBTC15M-26JUL150000-00",
+    "event_ticker": "KXBTC15M-26JUL150000",
     "title": "BTC price up in next 15 mins?",
-    "strike": 64738.39,
-    "open_time": "2026-07-15T00:45:00Z",
-    "close_time": "2026-07-15T01:00:00Z",
+    "strike": 64653.01,
+    "open_time": "2026-07-15T03:45:00Z",
+    "close_time": "2026-07-15T04:00:00Z",
     "status": "active",
     "result": "",
-    "first_seen_ts": "2026-07-15T00:53:45Z",
-    "last_seen_ts": "2026-07-15T00:57:07Z",
-    "yes_prob_first": 77.5,
-    "yes_prob_last": 98.8,
-    "yes_prob_min": 77.5,
-    "yes_prob_max": 98.8,
-    "yes_bid_pct": 98.7,
-    "yes_ask_pct": 98.8,
-    "no_bid_pct": 1.2,
-    "no_ask_pct": 1.3,
-    "volume_max": 1140635.26,
-    "open_interest": 390390.92,
+    "first_seen_ts": "2026-07-15T03:52:20Z",
+    "last_seen_ts": "2026-07-15T03:55:41Z",
+    "yes_prob_first": 97.2,
+    "yes_prob_last": 99.3,
+    "yes_prob_min": 94.8,
+    "yes_prob_max": 99.3,
+    "yes_bid_pct": 99.3,
+    "yes_ask_pct": 99.4,
+    "no_bid_pct": 0.6,
+    "no_ask_pct": 0.7000000000000001,
+    "volume_max": 1272852.37,
+    "open_interest": 450726.09,
     "sample_count": 6,
     "live_sample_count": 6,
     "prob_timeline": [
       [
-        8.8,
-        77.5,
-        "2026-07-15T00:53:45Z"
+        7.3,
+        97.2,
+        "2026-07-15T03:52:20Z"
       ],
       [
-        9.4,
-        79.5,
-        "2026-07-15T00:54:26Z"
+        8.0,
+        98.6,
+        "2026-07-15T03:53:00Z"
       ],
       [
-        10.1,
-        92.2,
-        "2026-07-15T00:55:06Z"
+        8.7,
+        96.7,
+        "2026-07-15T03:53:40Z"
       ],
       [
-        10.8,
-        91.8,
-        "2026-07-15T00:55:46Z"
+        9.3,
+        94.8,
+        "2026-07-15T03:54:21Z"
       ],
       [
-        11.4,
-        97.0,
-        "2026-07-15T00:56:26Z"
+        10.0,
+        97.5,
+        "2026-07-15T03:55:01Z"
       ],
       [
-        12.1,
-        98.8,
-        "2026-07-15T00:57:07Z"
+        10.7,
+        99.3,
+        "2026-07-15T03:55:41Z"
       ]
     ],
     "diff_timeline": [
       [
-        8.8,
-        29.61,
-        "2026-07-15T00:53:45Z"
+        7.3,
+        48.99,
+        "2026-07-15T03:52:20Z"
       ],
       [
-        9.4,
-        33.61,
-        "2026-07-15T00:54:26Z"
+        8.0,
+        48.99,
+        "2026-07-15T03:53:00Z"
       ],
       [
-        10.1,
-        33.61,
-        "2026-07-15T00:55:06Z"
+        8.7,
+        83.99,
+        "2026-07-15T03:53:40Z"
       ],
       [
-        10.8,
-        33.61,
-        "2026-07-15T00:55:46Z"
+        9.3,
+        105.99,
+        "2026-07-15T03:54:21Z"
       ],
       [
-        11.4,
-        42.61,
-        "2026-07-15T00:56:26Z"
+        10.0,
+        105.99,
+        "2026-07-15T03:55:01Z"
       ],
       [
-        12.1,
-        45.61,
-        "2026-07-15T00:57:07Z"
+        10.7,
+        79.99,
+        "2026-07-15T03:55:41Z"
       ]
     ],
     "btc_timeline": [
       [
-        8.8,
-        64768.0,
-        "2026-07-15T00:53:45Z"
+        7.3,
+        64702.0,
+        "2026-07-15T03:52:20Z"
       ],
       [
-        9.4,
-        64772.0,
-        "2026-07-15T00:54:26Z"
+        8.0,
+        64702.0,
+        "2026-07-15T03:53:00Z"
       ],
       [
-        10.1,
-        64772.0,
-        "2026-07-15T00:55:06Z"
+        8.7,
+        64737.0,
+        "2026-07-15T03:53:40Z"
       ],
       [
-        10.8,
-        64772.0,
-        "2026-07-15T00:55:46Z"
+        9.3,
+        64759.0,
+        "2026-07-15T03:54:21Z"
       ],
       [
-        11.4,
-        64781.0,
-        "2026-07-15T00:56:26Z"
+        10.0,
+        64759.0,
+        "2026-07-15T03:55:01Z"
       ],
       [
-        12.1,
-        64784.0,
-        "2026-07-15T00:57:07Z"
+        10.7,
+        64733.0,
+        "2026-07-15T03:55:41Z"
       ]
     ],
     "volume_timeline": [
       [
-        8.8,
-        763282.51,
-        "2026-07-15T00:53:45Z"
+        7.3,
+        842493.91,
+        "2026-07-15T03:52:20Z"
       ],
       [
-        9.4,
-        798739.63,
-        "2026-07-15T00:54:26Z"
+        8.0,
+        924768.47,
+        "2026-07-15T03:53:00Z"
       ],
       [
-        10.1,
-        856359.38,
-        "2026-07-15T00:55:06Z"
+        8.7,
+        991279.0,
+        "2026-07-15T03:53:40Z"
       ],
       [
-        10.8,
-        949066.17,
-        "2026-07-15T00:55:46Z"
+        9.3,
+        1098683.1,
+        "2026-07-15T03:54:21Z"
       ],
       [
-        11.4,
-        1068257.96,
-        "2026-07-15T00:56:26Z"
+        10.0,
+        1198271.68,
+        "2026-07-15T03:55:01Z"
       ],
       [
-        12.1,
-        1140635.26,
-        "2026-07-15T00:57:07Z"
+        10.7,
+        1272852.37,
+        "2026-07-15T03:55:41Z"
       ]
     ],
     "open_interest_timeline": [
       [
-        8.8,
-        327189.06,
-        "2026-07-15T00:53:45Z"
+        7.3,
+        304353.57,
+        "2026-07-15T03:52:20Z"
       ],
       [
-        9.4,
-        332580.05,
-        "2026-07-15T00:54:26Z"
+        8.0,
+        353920.46,
+        "2026-07-15T03:53:00Z"
       ],
       [
-        10.1,
-        338213.91,
-        "2026-07-15T00:55:06Z"
+        8.7,
+        382832.33,
+        "2026-07-15T03:53:40Z"
       ],
       [
-        10.8,
-        370562.5,
-        "2026-07-15T00:55:46Z"
+        9.3,
+        399445.14,
+        "2026-07-15T03:54:21Z"
       ],
       [
-        11.4,
-        383925.31,
-        "2026-07-15T00:56:26Z"
+        10.0,
+        415467.22,
+        "2026-07-15T03:55:01Z"
       ],
       [
-        12.1,
-        390390.92,
-        "2026-07-15T00:57:07Z"
+        10.7,
+        450726.09,
+        "2026-07-15T03:55:41Z"
       ]
     ],
-    "yes_leaning_seconds": 202.0,
+    "yes_leaning_seconds": 201.0,
     "no_leaning_seconds": 0.0,
-    "btc_spot_usd": 64784.0,
-    "distance_to_strike_pct": 0.0704527869784846,
-    "seconds_remaining": 171
+    "btc_spot_usd": 64733.0,
+    "distance_to_strike_pct": 0.1237220045903477,
+    "seconds_remaining": 257
   },
   "summary": {
-    "total_markets_tracked": 1120,
-    "settled_count": 1119,
-    "up_wins": 565,
-    "down_wins": 554,
-    "up_win_rate_pct": 50.49151027703307,
-    "avg_volume": 1247070.1057193922,
+    "total_markets_tracked": 1132,
+    "settled_count": 1131,
+    "up_wins": 571,
+    "down_wins": 560,
+    "up_win_rate_pct": 50.48629531388153,
+    "avg_volume": 1250244.739832007,
     "longest_streak": {
       "result": "yes",
       "length": 9
     },
     "current_streak": {
-      "result": "no",
-      "length": 3
+      "result": "yes",
+      "length": 1
     },
-    "pct_time_yes_leaning": 48.81378480250863,
-    "pct_time_no_leaning": 51.18621519749137
+    "pct_time_yes_leaning": 49.13920624429547,
+    "pct_time_no_leaning": 50.86079375570453
   },
   "recent_markets": [
+    {
+      "ticker": "KXBTC15M-26JUL142345-45",
+      "event_ticker": "KXBTC15M-26JUL142345",
+      "title": "BTC price up in next 15 mins?",
+      "strike": 64555.7,
+      "open_time": "2026-07-15T03:30:00Z",
+      "close_time": "2026-07-15T03:45:00Z",
+      "status": "finalized",
+      "result": "yes",
+      "first_seen_ts": "2026-07-15T03:52:20Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
+      "yes_prob_first": null,
+      "yes_prob_last": null,
+      "yes_prob_min": null,
+      "yes_prob_max": null,
+      "yes_bid_pct": null,
+      "yes_ask_pct": null,
+      "no_bid_pct": null,
+      "no_ask_pct": null,
+      "volume_max": 1740302.36,
+      "open_interest": 588520.86,
+      "sample_count": 6,
+      "live_sample_count": 0,
+      "prob_timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": [],
+      "yes_leaning_seconds": 0.0,
+      "no_leaning_seconds": 0.0
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142330-30",
+      "event_ticker": "KXBTC15M-26JUL142330",
+      "title": "BTC price up in next 15 mins?",
+      "strike": 64581.88,
+      "open_time": "2026-07-15T03:15:00Z",
+      "close_time": "2026-07-15T03:30:00Z",
+      "status": "finalized",
+      "result": "no",
+      "first_seen_ts": "2026-07-15T03:52:20Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
+      "yes_prob_first": null,
+      "yes_prob_last": null,
+      "yes_prob_min": null,
+      "yes_prob_max": null,
+      "yes_bid_pct": null,
+      "yes_ask_pct": null,
+      "no_bid_pct": null,
+      "no_ask_pct": null,
+      "volume_max": 1537583.48,
+      "open_interest": 509550.32,
+      "sample_count": 6,
+      "live_sample_count": 0,
+      "prob_timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": [],
+      "yes_leaning_seconds": 0.0,
+      "no_leaning_seconds": 0.0
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142315-15",
+      "event_ticker": "KXBTC15M-26JUL142315",
+      "title": "BTC price up in next 15 mins?",
+      "strike": 64453.05,
+      "open_time": "2026-07-15T03:00:00Z",
+      "close_time": "2026-07-15T03:15:00Z",
+      "status": "finalized",
+      "result": "yes",
+      "first_seen_ts": "2026-07-15T03:52:20Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
+      "yes_prob_first": null,
+      "yes_prob_last": null,
+      "yes_prob_min": null,
+      "yes_prob_max": null,
+      "yes_bid_pct": null,
+      "yes_ask_pct": null,
+      "no_bid_pct": null,
+      "no_ask_pct": null,
+      "volume_max": 1448715.89,
+      "open_interest": 603218.7,
+      "sample_count": 6,
+      "live_sample_count": 0,
+      "prob_timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": [],
+      "yes_leaning_seconds": 0.0,
+      "no_leaning_seconds": 0.0
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142300-00",
+      "event_ticker": "KXBTC15M-26JUL142300",
+      "title": "BTC price up in next 15 mins?",
+      "strike": 64510.33,
+      "open_time": "2026-07-15T02:45:00Z",
+      "close_time": "2026-07-15T03:00:00Z",
+      "status": "finalized",
+      "result": "no",
+      "first_seen_ts": "2026-07-15T03:52:20Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
+      "yes_prob_first": null,
+      "yes_prob_last": null,
+      "yes_prob_min": null,
+      "yes_prob_max": null,
+      "yes_bid_pct": null,
+      "yes_ask_pct": null,
+      "no_bid_pct": null,
+      "no_ask_pct": null,
+      "volume_max": 1315349.69,
+      "open_interest": 474287.64,
+      "sample_count": 6,
+      "live_sample_count": 0,
+      "prob_timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": [],
+      "yes_leaning_seconds": 0.0,
+      "no_leaning_seconds": 0.0
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142245-45",
+      "event_ticker": "KXBTC15M-26JUL142245",
+      "title": "BTC price up in next 15 mins?",
+      "strike": 64487.39,
+      "open_time": "2026-07-15T02:30:00Z",
+      "close_time": "2026-07-15T02:45:00Z",
+      "status": "finalized",
+      "result": "yes",
+      "first_seen_ts": "2026-07-15T03:52:20Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
+      "yes_prob_first": null,
+      "yes_prob_last": null,
+      "yes_prob_min": null,
+      "yes_prob_max": null,
+      "yes_bid_pct": null,
+      "yes_ask_pct": null,
+      "no_bid_pct": null,
+      "no_ask_pct": null,
+      "volume_max": 2127574.59,
+      "open_interest": 432105.54,
+      "sample_count": 6,
+      "live_sample_count": 0,
+      "prob_timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": [],
+      "yes_leaning_seconds": 0.0,
+      "no_leaning_seconds": 0.0
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142230-30",
+      "event_ticker": "KXBTC15M-26JUL142230",
+      "title": "BTC price up in next 15 mins?",
+      "strike": 64662.82,
+      "open_time": "2026-07-15T02:15:00Z",
+      "close_time": "2026-07-15T02:30:00Z",
+      "status": "finalized",
+      "result": "no",
+      "first_seen_ts": "2026-07-15T03:52:20Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
+      "yes_prob_first": null,
+      "yes_prob_last": null,
+      "yes_prob_min": null,
+      "yes_prob_max": null,
+      "yes_bid_pct": null,
+      "yes_ask_pct": null,
+      "no_bid_pct": null,
+      "no_ask_pct": null,
+      "volume_max": 1129935.77,
+      "open_interest": 607829.75,
+      "sample_count": 6,
+      "live_sample_count": 0,
+      "prob_timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": [],
+      "yes_leaning_seconds": 0.0,
+      "no_leaning_seconds": 0.0
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142215-15",
+      "event_ticker": "KXBTC15M-26JUL142215",
+      "title": "BTC price up in next 15 mins?",
+      "strike": 64629.87,
+      "open_time": "2026-07-15T02:00:00Z",
+      "close_time": "2026-07-15T02:15:00Z",
+      "status": "finalized",
+      "result": "yes",
+      "first_seen_ts": "2026-07-15T03:52:20Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
+      "yes_prob_first": null,
+      "yes_prob_last": null,
+      "yes_prob_min": null,
+      "yes_prob_max": null,
+      "yes_bid_pct": null,
+      "yes_ask_pct": null,
+      "no_bid_pct": null,
+      "no_ask_pct": null,
+      "volume_max": 1932959.09,
+      "open_interest": 486450.88,
+      "sample_count": 6,
+      "live_sample_count": 0,
+      "prob_timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": [],
+      "yes_leaning_seconds": 0.0,
+      "no_leaning_seconds": 0.0
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142200-00",
+      "event_ticker": "KXBTC15M-26JUL142200",
+      "title": "BTC price up in next 15 mins?",
+      "strike": 64640.32,
+      "open_time": "2026-07-15T01:45:00Z",
+      "close_time": "2026-07-15T02:00:00Z",
+      "status": "finalized",
+      "result": "no",
+      "first_seen_ts": "2026-07-15T03:52:20Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
+      "yes_prob_first": null,
+      "yes_prob_last": null,
+      "yes_prob_min": null,
+      "yes_prob_max": null,
+      "yes_bid_pct": null,
+      "yes_ask_pct": null,
+      "no_bid_pct": null,
+      "no_ask_pct": null,
+      "volume_max": 1768694.46,
+      "open_interest": 448059.84,
+      "sample_count": 6,
+      "live_sample_count": 0,
+      "prob_timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": [],
+      "yes_leaning_seconds": 0.0,
+      "no_leaning_seconds": 0.0
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142145-45",
+      "event_ticker": "KXBTC15M-26JUL142145",
+      "title": "BTC price up in next 15 mins?",
+      "strike": 64791.69,
+      "open_time": "2026-07-15T01:30:00Z",
+      "close_time": "2026-07-15T01:45:00Z",
+      "status": "finalized",
+      "result": "no",
+      "first_seen_ts": "2026-07-15T03:52:20Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
+      "yes_prob_first": null,
+      "yes_prob_last": null,
+      "yes_prob_min": null,
+      "yes_prob_max": null,
+      "yes_bid_pct": null,
+      "yes_ask_pct": null,
+      "no_bid_pct": null,
+      "no_ask_pct": null,
+      "volume_max": 1074690.69,
+      "open_interest": 485040.52,
+      "sample_count": 6,
+      "live_sample_count": 0,
+      "prob_timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": [],
+      "yes_leaning_seconds": 0.0,
+      "no_leaning_seconds": 0.0
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142130-30",
+      "event_ticker": "KXBTC15M-26JUL142130",
+      "title": "BTC price up in next 15 mins?",
+      "strike": 64701.74,
+      "open_time": "2026-07-15T01:15:00Z",
+      "close_time": "2026-07-15T01:30:00Z",
+      "status": "finalized",
+      "result": "yes",
+      "first_seen_ts": "2026-07-15T03:52:20Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
+      "yes_prob_first": null,
+      "yes_prob_last": null,
+      "yes_prob_min": null,
+      "yes_prob_max": null,
+      "yes_bid_pct": null,
+      "yes_ask_pct": null,
+      "no_bid_pct": null,
+      "no_ask_pct": null,
+      "volume_max": 1826008.11,
+      "open_interest": 509037.95,
+      "sample_count": 6,
+      "live_sample_count": 0,
+      "prob_timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": [],
+      "yes_leaning_seconds": 0.0,
+      "no_leaning_seconds": 0.0
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142115-15",
+      "event_ticker": "KXBTC15M-26JUL142115",
+      "title": "BTC price up in next 15 mins?",
+      "strike": 64788.43,
+      "open_time": "2026-07-15T01:00:00Z",
+      "close_time": "2026-07-15T01:15:00Z",
+      "status": "finalized",
+      "result": "no",
+      "first_seen_ts": "2026-07-15T03:52:20Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
+      "yes_prob_first": null,
+      "yes_prob_last": null,
+      "yes_prob_min": null,
+      "yes_prob_max": null,
+      "yes_bid_pct": null,
+      "yes_ask_pct": null,
+      "no_bid_pct": null,
+      "no_ask_pct": null,
+      "volume_max": 1357913.93,
+      "open_interest": 604219.63,
+      "sample_count": 6,
+      "live_sample_count": 0,
+      "prob_timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": [],
+      "yes_leaning_seconds": 0.0,
+      "no_leaning_seconds": 0.0
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142100-00",
+      "event_ticker": "KXBTC15M-26JUL142100",
+      "title": "BTC price up in next 15 mins?",
+      "strike": 64738.39,
+      "open_time": "2026-07-15T00:45:00Z",
+      "close_time": "2026-07-15T01:00:00Z",
+      "status": "finalized",
+      "result": "yes",
+      "first_seen_ts": "2026-07-15T00:53:45Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
+      "yes_prob_first": 77.5,
+      "yes_prob_last": 98.8,
+      "yes_prob_min": 77.5,
+      "yes_prob_max": 98.8,
+      "yes_bid_pct": 98.7,
+      "yes_ask_pct": 98.8,
+      "no_bid_pct": 1.2,
+      "no_ask_pct": 1.3,
+      "volume_max": 1295624.39,
+      "open_interest": 390390.92,
+      "sample_count": 12,
+      "live_sample_count": 6,
+      "prob_timeline": [
+        [
+          8.8,
+          77.5,
+          "2026-07-15T00:53:45Z"
+        ],
+        [
+          9.4,
+          79.5,
+          "2026-07-15T00:54:26Z"
+        ],
+        [
+          10.1,
+          92.2,
+          "2026-07-15T00:55:06Z"
+        ],
+        [
+          10.8,
+          91.8,
+          "2026-07-15T00:55:46Z"
+        ],
+        [
+          11.4,
+          97.0,
+          "2026-07-15T00:56:26Z"
+        ],
+        [
+          12.1,
+          98.8,
+          "2026-07-15T00:57:07Z"
+        ]
+      ],
+      "diff_timeline": [
+        [
+          8.8,
+          29.61,
+          "2026-07-15T00:53:45Z"
+        ],
+        [
+          9.4,
+          33.61,
+          "2026-07-15T00:54:26Z"
+        ],
+        [
+          10.1,
+          33.61,
+          "2026-07-15T00:55:06Z"
+        ],
+        [
+          10.8,
+          33.61,
+          "2026-07-15T00:55:46Z"
+        ],
+        [
+          11.4,
+          42.61,
+          "2026-07-15T00:56:26Z"
+        ],
+        [
+          12.1,
+          45.61,
+          "2026-07-15T00:57:07Z"
+        ]
+      ],
+      "btc_timeline": [
+        [
+          8.8,
+          64768.0,
+          "2026-07-15T00:53:45Z"
+        ],
+        [
+          9.4,
+          64772.0,
+          "2026-07-15T00:54:26Z"
+        ],
+        [
+          10.1,
+          64772.0,
+          "2026-07-15T00:55:06Z"
+        ],
+        [
+          10.8,
+          64772.0,
+          "2026-07-15T00:55:46Z"
+        ],
+        [
+          11.4,
+          64781.0,
+          "2026-07-15T00:56:26Z"
+        ],
+        [
+          12.1,
+          64784.0,
+          "2026-07-15T00:57:07Z"
+        ]
+      ],
+      "volume_timeline": [
+        [
+          8.8,
+          763282.51,
+          "2026-07-15T00:53:45Z"
+        ],
+        [
+          9.4,
+          798739.63,
+          "2026-07-15T00:54:26Z"
+        ],
+        [
+          10.1,
+          856359.38,
+          "2026-07-15T00:55:06Z"
+        ],
+        [
+          10.8,
+          949066.17,
+          "2026-07-15T00:55:46Z"
+        ],
+        [
+          11.4,
+          1068257.96,
+          "2026-07-15T00:56:26Z"
+        ],
+        [
+          12.1,
+          1140635.26,
+          "2026-07-15T00:57:07Z"
+        ]
+      ],
+      "open_interest_timeline": [
+        [
+          8.8,
+          327189.06,
+          "2026-07-15T00:53:45Z"
+        ],
+        [
+          9.4,
+          332580.05,
+          "2026-07-15T00:54:26Z"
+        ],
+        [
+          10.1,
+          338213.91,
+          "2026-07-15T00:55:06Z"
+        ],
+        [
+          10.8,
+          370562.5,
+          "2026-07-15T00:55:46Z"
+        ],
+        [
+          11.4,
+          383925.31,
+          "2026-07-15T00:56:26Z"
+        ],
+        [
+          12.1,
+          390390.92,
+          "2026-07-15T00:57:07Z"
+        ]
+      ],
+      "yes_leaning_seconds": 202.0,
+      "no_leaning_seconds": 0.0
+    },
     {
       "ticker": "KXBTC15M-26JUL142045-45",
       "event_ticker": "KXBTC15M-26JUL142045",
@@ -219,7 +746,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-15T00:53:45Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -230,7 +757,7 @@
       "no_ask_pct": null,
       "volume_max": 1291830.03,
       "open_interest": 463522.77,
-      "sample_count": 6,
+      "sample_count": 12,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -250,7 +777,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-15T00:53:45Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -261,7 +788,7 @@
       "no_ask_pct": null,
       "volume_max": 1343662.29,
       "open_interest": 467831.43,
-      "sample_count": 6,
+      "sample_count": 12,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -281,7 +808,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-15T00:53:45Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -292,7 +819,7 @@
       "no_ask_pct": null,
       "volume_max": 1998101.11,
       "open_interest": 384416.91,
-      "sample_count": 6,
+      "sample_count": 12,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -312,7 +839,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-15T00:53:45Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -323,7 +850,7 @@
       "no_ask_pct": null,
       "volume_max": 2303946.79,
       "open_interest": 440580.89,
-      "sample_count": 6,
+      "sample_count": 12,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -343,7 +870,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T23:30:42Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": 59.5,
       "yes_prob_last": 47.5,
       "yes_prob_min": 47.5,
@@ -354,7 +881,7 @@
       "no_ask_pct": 53.0,
       "volume_max": 1284991.67,
       "open_interest": 170946.19,
-      "sample_count": 12,
+      "sample_count": 18,
       "live_sample_count": 6,
       "prob_timeline": [
         [
@@ -529,7 +1056,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-14T23:30:42Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -540,7 +1067,7 @@
       "no_ask_pct": null,
       "volume_max": 1282595.43,
       "open_interest": 599567.41,
-      "sample_count": 12,
+      "sample_count": 18,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -560,7 +1087,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T23:30:42Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -571,7 +1098,7 @@
       "no_ask_pct": null,
       "volume_max": 2008480.22,
       "open_interest": 479528.11,
-      "sample_count": 12,
+      "sample_count": 18,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -591,7 +1118,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-14T23:30:42Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -602,7 +1129,7 @@
       "no_ask_pct": null,
       "volume_max": 1727731.81,
       "open_interest": 406551.61,
-      "sample_count": 12,
+      "sample_count": 18,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -622,7 +1149,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-14T22:38:28Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": 74.5,
       "yes_prob_last": 36.5,
       "yes_prob_min": 36.5,
@@ -633,7 +1160,7 @@
       "no_ask_pct": 64.0,
       "volume_max": 2225489.58,
       "open_interest": 373816.19,
-      "sample_count": 18,
+      "sample_count": 24,
       "live_sample_count": 6,
       "prob_timeline": [
         [
@@ -808,7 +1335,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T22:38:28Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -819,7 +1346,7 @@
       "no_ask_pct": null,
       "volume_max": 1508778.6,
       "open_interest": 725421.06,
-      "sample_count": 18,
+      "sample_count": 24,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -839,7 +1366,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-14T22:38:28Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -850,7 +1377,7 @@
       "no_ask_pct": null,
       "volume_max": 1655912.26,
       "open_interest": 686269.55,
-      "sample_count": 18,
+      "sample_count": 24,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -870,7 +1397,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-14T22:38:28Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -881,7 +1408,7 @@
       "no_ask_pct": null,
       "volume_max": 1743412.49,
       "open_interest": 587787.91,
-      "sample_count": 18,
+      "sample_count": 24,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -901,7 +1428,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T21:39:55Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": 91.7,
       "yes_prob_last": 98.7,
       "yes_prob_min": 91.7,
@@ -912,7 +1439,7 @@
       "no_ask_pct": 1.5,
       "volume_max": 1542111.5,
       "open_interest": 472035.85,
-      "sample_count": 24,
+      "sample_count": 30,
       "live_sample_count": 6,
       "prob_timeline": [
         [
@@ -1087,7 +1614,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T21:39:55Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -1098,7 +1625,7 @@
       "no_ask_pct": null,
       "volume_max": 1557263.51,
       "open_interest": 642168.93,
-      "sample_count": 24,
+      "sample_count": 30,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -1118,7 +1645,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T21:39:55Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -1129,7 +1656,7 @@
       "no_ask_pct": null,
       "volume_max": 1722552.38,
       "open_interest": 519223.32,
-      "sample_count": 24,
+      "sample_count": 30,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -1149,7 +1676,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T20:45:52Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": 64.5,
       "yes_prob_last": 80.5,
       "yes_prob_min": 64.5,
@@ -1160,7 +1687,7 @@
       "no_ask_pct": 20.0,
       "volume_max": 1482446.57,
       "open_interest": 209885.41,
-      "sample_count": 29,
+      "sample_count": 35,
       "live_sample_count": 5,
       "prob_timeline": [
         [
@@ -1310,7 +1837,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T20:45:11Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -1321,7 +1848,7 @@
       "no_ask_pct": null,
       "volume_max": 1915318.26,
       "open_interest": 399919.14,
-      "sample_count": 30,
+      "sample_count": 36,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -1341,7 +1868,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-14T20:45:11Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -1352,7 +1879,7 @@
       "no_ask_pct": null,
       "volume_max": 1621327.68,
       "open_interest": 390855.32,
-      "sample_count": 30,
+      "sample_count": 36,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -1372,7 +1899,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-14T20:45:11Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -1383,7 +1910,7 @@
       "no_ask_pct": null,
       "volume_max": 1196147.53,
       "open_interest": 552078.4,
-      "sample_count": 30,
+      "sample_count": 36,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -1403,7 +1930,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T19:46:19Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": 64.5,
       "yes_prob_last": 75.5,
       "yes_prob_min": 64.5,
@@ -1414,7 +1941,7 @@
       "no_ask_pct": 25.0,
       "volume_max": 1054773.86,
       "open_interest": 194329.37,
-      "sample_count": 36,
+      "sample_count": 42,
       "live_sample_count": 6,
       "prob_timeline": [
         [
@@ -1589,7 +2116,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-14T19:46:19Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -1600,7 +2127,7 @@
       "no_ask_pct": null,
       "volume_max": 1255627.38,
       "open_interest": 566321.71,
-      "sample_count": 36,
+      "sample_count": 42,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -1620,7 +2147,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-14T19:46:19Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -1631,7 +2158,7 @@
       "no_ask_pct": null,
       "volume_max": 1800850.09,
       "open_interest": 286713.88,
-      "sample_count": 36,
+      "sample_count": 42,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -1651,7 +2178,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T19:46:19Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -1662,7 +2189,7 @@
       "no_ask_pct": null,
       "volume_max": 1417099.91,
       "open_interest": 308790.28,
-      "sample_count": 36,
+      "sample_count": 42,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -1682,7 +2209,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-14T19:46:19Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -1693,7 +2220,7 @@
       "no_ask_pct": null,
       "volume_max": 2230903.06,
       "open_interest": 346050.53,
-      "sample_count": 36,
+      "sample_count": 42,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -1713,7 +2240,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T19:46:19Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -1724,7 +2251,7 @@
       "no_ask_pct": null,
       "volume_max": 1842372.69,
       "open_interest": 397582.41,
-      "sample_count": 36,
+      "sample_count": 42,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -1744,7 +2271,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T18:16:26Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": 64.5,
       "yes_prob_last": 70.5,
       "yes_prob_min": 62.5,
@@ -1755,7 +2282,7 @@
       "no_ask_pct": 30.0,
       "volume_max": 1456053.4,
       "open_interest": 188062.73,
-      "sample_count": 42,
+      "sample_count": 48,
       "live_sample_count": 6,
       "prob_timeline": [
         [
@@ -1930,7 +2457,7 @@
       "status": "finalized",
       "result": "no",
       "first_seen_ts": "2026-07-14T18:16:26Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -1941,7 +2468,7 @@
       "no_ask_pct": null,
       "volume_max": 1195133.5,
       "open_interest": 566318.83,
-      "sample_count": 42,
+      "sample_count": 48,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -1961,7 +2488,7 @@
       "status": "finalized",
       "result": "yes",
       "first_seen_ts": "2026-07-14T18:16:26Z",
-      "last_seen_ts": "2026-07-15T00:57:07Z",
+      "last_seen_ts": "2026-07-15T03:55:41Z",
       "yes_prob_first": null,
       "yes_prob_last": null,
       "yes_prob_min": null,
@@ -1972,7 +2499,7 @@
       "no_ask_pct": null,
       "volume_max": 1194152.95,
       "open_interest": 463378.7,
-      "sample_count": 42,
+      "sample_count": 48,
       "live_sample_count": 0,
       "prob_timeline": [],
       "diff_timeline": [],
@@ -3076,691 +3603,344 @@
       "open_interest_timeline": [],
       "yes_leaning_seconds": 0.0,
       "no_leaning_seconds": 0.0
-    },
-    {
-      "ticker": "KXBTC15M-26JUL140845-45",
-      "event_ticker": "KXBTC15M-26JUL140845",
-      "title": "BTC price up in next 15 mins?",
-      "strike": 62869.03,
-      "open_time": "2026-07-14T12:30:00Z",
-      "close_time": "2026-07-14T12:45:00Z",
-      "status": "finalized",
-      "result": "yes",
-      "first_seen_ts": "2026-07-14T12:38:26Z",
-      "last_seen_ts": "2026-07-14T22:41:50Z",
-      "yes_prob_first": 99.1,
-      "yes_prob_last": 99.5,
-      "yes_prob_min": 99.1,
-      "yes_prob_max": 99.8,
-      "yes_bid_pct": 99.5,
-      "yes_ask_pct": 99.6,
-      "no_bid_pct": 0.4,
-      "no_ask_pct": 0.5,
-      "volume_max": 702024.61,
-      "open_interest": 355662.55,
-      "sample_count": 54,
-      "live_sample_count": 6,
-      "prob_timeline": [
-        [
-          8.4,
-          99.1,
-          "2026-07-14T12:38:26Z"
-        ],
-        [
-          9.1,
-          99.5,
-          "2026-07-14T12:39:06Z"
-        ],
-        [
-          9.8,
-          99.5,
-          "2026-07-14T12:39:47Z"
-        ],
-        [
-          10.4,
-          99.8,
-          "2026-07-14T12:40:27Z"
-        ],
-        [
-          11.1,
-          99.8,
-          "2026-07-14T12:41:07Z"
-        ],
-        [
-          11.8,
-          99.5,
-          "2026-07-14T12:41:47Z"
-        ]
-      ],
-      "diff_timeline": [
-        [
-          8.4,
-          607.97,
-          "2026-07-14T12:38:26Z"
-        ],
-        [
-          9.1,
-          607.97,
-          "2026-07-14T12:39:06Z"
-        ],
-        [
-          9.8,
-          623.97,
-          "2026-07-14T12:39:47Z"
-        ],
-        [
-          10.4,
-          586.97,
-          "2026-07-14T12:40:27Z"
-        ],
-        [
-          11.1,
-          586.97,
-          "2026-07-14T12:41:07Z"
-        ],
-        [
-          11.8,
-          527.97,
-          "2026-07-14T12:41:47Z"
-        ]
-      ],
-      "btc_timeline": [
-        [
-          8.4,
-          63477.0,
-          "2026-07-14T12:38:26Z"
-        ],
-        [
-          9.1,
-          63477.0,
-          "2026-07-14T12:39:06Z"
-        ],
-        [
-          9.8,
-          63493.0,
-          "2026-07-14T12:39:47Z"
-        ],
-        [
-          10.4,
-          63456.0,
-          "2026-07-14T12:40:27Z"
-        ],
-        [
-          11.1,
-          63456.0,
-          "2026-07-14T12:41:07Z"
-        ],
-        [
-          11.8,
-          63397.0,
-          "2026-07-14T12:41:47Z"
-        ]
-      ],
-      "volume_timeline": [
-        [
-          8.4,
-          590362.81,
-          "2026-07-14T12:38:26Z"
-        ],
-        [
-          9.1,
-          599744.15,
-          "2026-07-14T12:39:06Z"
-        ],
-        [
-          9.8,
-          605827.84,
-          "2026-07-14T12:39:47Z"
-        ],
-        [
-          10.4,
-          631931.33,
-          "2026-07-14T12:40:27Z"
-        ],
-        [
-          11.1,
-          649816.0,
-          "2026-07-14T12:41:07Z"
-        ],
-        [
-          11.8,
-          658493.08,
-          "2026-07-14T12:41:47Z"
-        ]
-      ],
-      "open_interest_timeline": [
-        [
-          8.4,
-          311582.64,
-          "2026-07-14T12:38:26Z"
-        ],
-        [
-          9.1,
-          316847.72,
-          "2026-07-14T12:39:06Z"
-        ],
-        [
-          9.8,
-          321518.76,
-          "2026-07-14T12:39:47Z"
-        ],
-        [
-          10.4,
-          341038.2,
-          "2026-07-14T12:40:27Z"
-        ],
-        [
-          11.1,
-          350630.36,
-          "2026-07-14T12:41:07Z"
-        ],
-        [
-          11.8,
-          355662.55,
-          "2026-07-14T12:41:47Z"
-        ]
-      ],
-      "yes_leaning_seconds": 201.0,
-      "no_leaning_seconds": 0.0
-    },
-    {
-      "ticker": "KXBTC15M-26JUL140830-30",
-      "event_ticker": "KXBTC15M-26JUL140830",
-      "title": "BTC price up in next 15 mins?",
-      "strike": 62775.24,
-      "open_time": "2026-07-14T12:15:00Z",
-      "close_time": "2026-07-14T12:30:00Z",
-      "status": "finalized",
-      "result": "yes",
-      "first_seen_ts": "2026-07-14T12:38:26Z",
-      "last_seen_ts": "2026-07-14T21:43:17Z",
-      "yes_prob_first": null,
-      "yes_prob_last": null,
-      "yes_prob_min": null,
-      "yes_prob_max": null,
-      "yes_bid_pct": null,
-      "yes_ask_pct": null,
-      "no_bid_pct": null,
-      "no_ask_pct": null,
-      "volume_max": 776670.84,
-      "open_interest": 360195.27,
-      "sample_count": 48,
-      "live_sample_count": 0,
-      "prob_timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": [],
-      "yes_leaning_seconds": 0.0,
-      "no_leaning_seconds": 0.0
-    },
-    {
-      "ticker": "KXBTC15M-26JUL140815-15",
-      "event_ticker": "KXBTC15M-26JUL140815",
-      "title": "BTC price up in next 15 mins?",
-      "strike": 62777.51,
-      "open_time": "2026-07-14T12:00:00Z",
-      "close_time": "2026-07-14T12:15:00Z",
-      "status": "finalized",
-      "result": "no",
-      "first_seen_ts": "2026-07-14T12:38:26Z",
-      "last_seen_ts": "2026-07-14T21:43:17Z",
-      "yes_prob_first": null,
-      "yes_prob_last": null,
-      "yes_prob_min": null,
-      "yes_prob_max": null,
-      "yes_bid_pct": null,
-      "yes_ask_pct": null,
-      "no_bid_pct": null,
-      "no_ask_pct": null,
-      "volume_max": 1171909.68,
-      "open_interest": 235154.58,
-      "sample_count": 48,
-      "live_sample_count": 0,
-      "prob_timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": [],
-      "yes_leaning_seconds": 0.0,
-      "no_leaning_seconds": 0.0
-    },
-    {
-      "ticker": "KXBTC15M-26JUL140800-00",
-      "event_ticker": "KXBTC15M-26JUL140800",
-      "title": "BTC price up in next 15 mins?",
-      "strike": 62795.32,
-      "open_time": "2026-07-14T11:45:00Z",
-      "close_time": "2026-07-14T12:00:00Z",
-      "status": "finalized",
-      "result": "no",
-      "first_seen_ts": "2026-07-14T12:38:26Z",
-      "last_seen_ts": "2026-07-14T21:43:17Z",
-      "yes_prob_first": null,
-      "yes_prob_last": null,
-      "yes_prob_min": null,
-      "yes_prob_max": null,
-      "yes_bid_pct": null,
-      "yes_ask_pct": null,
-      "no_bid_pct": null,
-      "no_ask_pct": null,
-      "volume_max": 835662.58,
-      "open_interest": 171367.31,
-      "sample_count": 48,
-      "live_sample_count": 0,
-      "prob_timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": [],
-      "yes_leaning_seconds": 0.0,
-      "no_leaning_seconds": 0.0
-    },
-    {
-      "ticker": "KXBTC15M-26JUL140745-45",
-      "event_ticker": "KXBTC15M-26JUL140745",
-      "title": "BTC price up in next 15 mins?",
-      "strike": 62796.38,
-      "open_time": "2026-07-14T11:30:00Z",
-      "close_time": "2026-07-14T11:45:00Z",
-      "status": "finalized",
-      "result": "no",
-      "first_seen_ts": "2026-07-14T12:38:26Z",
-      "last_seen_ts": "2026-07-14T21:43:17Z",
-      "yes_prob_first": null,
-      "yes_prob_last": null,
-      "yes_prob_min": null,
-      "yes_prob_max": null,
-      "yes_bid_pct": null,
-      "yes_ask_pct": null,
-      "no_bid_pct": null,
-      "no_ask_pct": null,
-      "volume_max": 1152207.19,
-      "open_interest": 159959.73,
-      "sample_count": 48,
-      "live_sample_count": 0,
-      "prob_timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": [],
-      "yes_leaning_seconds": 0.0,
-      "no_leaning_seconds": 0.0
-    },
-    {
-      "ticker": "KXBTC15M-26JUL140730-30",
-      "event_ticker": "KXBTC15M-26JUL140730",
-      "title": "BTC price up in next 15 mins?",
-      "strike": 62704.75,
-      "open_time": "2026-07-14T11:15:00Z",
-      "close_time": "2026-07-14T11:30:00Z",
-      "status": "finalized",
-      "result": "yes",
-      "first_seen_ts": "2026-07-14T12:38:26Z",
-      "last_seen_ts": "2026-07-14T20:48:33Z",
-      "yes_prob_first": null,
-      "yes_prob_last": null,
-      "yes_prob_min": null,
-      "yes_prob_max": null,
-      "yes_bid_pct": null,
-      "yes_ask_pct": null,
-      "no_bid_pct": null,
-      "no_ask_pct": null,
-      "volume_max": 822764.55,
-      "open_interest": 219275.44,
-      "sample_count": 42,
-      "live_sample_count": 0,
-      "prob_timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": [],
-      "yes_leaning_seconds": 0.0,
-      "no_leaning_seconds": 0.0
-    },
-    {
-      "ticker": "KXBTC15M-26JUL140715-15",
-      "event_ticker": "KXBTC15M-26JUL140715",
-      "title": "BTC price up in next 15 mins?",
-      "strike": 62748.92,
-      "open_time": "2026-07-14T11:00:00Z",
-      "close_time": "2026-07-14T11:15:00Z",
-      "status": "finalized",
-      "result": "no",
-      "first_seen_ts": "2026-07-14T11:09:23Z",
-      "last_seen_ts": "2026-07-14T20:48:33Z",
-      "yes_prob_first": 3.4,
-      "yes_prob_last": 0.6,
-      "yes_prob_min": 0.6,
-      "yes_prob_max": 4.4,
-      "yes_bid_pct": 0.5,
-      "yes_ask_pct": 0.6,
-      "no_bid_pct": 99.4,
-      "no_ask_pct": 99.5,
-      "volume_max": 632893.87,
-      "open_interest": 256329.38,
-      "sample_count": 48,
-      "live_sample_count": 6,
-      "prob_timeline": [
-        [
-          9.4,
-          3.4,
-          "2026-07-14T11:09:23Z"
-        ],
-        [
-          10.1,
-          4.4,
-          "2026-07-14T11:10:04Z"
-        ],
-        [
-          10.7,
-          2.7,
-          "2026-07-14T11:10:44Z"
-        ],
-        [
-          11.4,
-          1.2,
-          "2026-07-14T11:11:25Z"
-        ],
-        [
-          12.1,
-          0.8,
-          "2026-07-14T11:12:05Z"
-        ],
-        [
-          12.8,
-          0.6,
-          "2026-07-14T11:12:45Z"
-        ]
-      ],
-      "diff_timeline": [
-        [
-          9.4,
-          -84.92,
-          "2026-07-14T11:09:23Z"
-        ],
-        [
-          10.1,
-          -84.92,
-          "2026-07-14T11:10:04Z"
-        ],
-        [
-          10.7,
-          -94.92,
-          "2026-07-14T11:10:44Z"
-        ],
-        [
-          11.4,
-          -78.92,
-          "2026-07-14T11:11:25Z"
-        ],
-        [
-          12.1,
-          -78.92,
-          "2026-07-14T11:12:05Z"
-        ],
-        [
-          12.8,
-          -85.92,
-          "2026-07-14T11:12:45Z"
-        ]
-      ],
-      "btc_timeline": [
-        [
-          9.4,
-          62664.0,
-          "2026-07-14T11:09:23Z"
-        ],
-        [
-          10.1,
-          62664.0,
-          "2026-07-14T11:10:04Z"
-        ],
-        [
-          10.7,
-          62654.0,
-          "2026-07-14T11:10:44Z"
-        ],
-        [
-          11.4,
-          62670.0,
-          "2026-07-14T11:11:25Z"
-        ],
-        [
-          12.1,
-          62670.0,
-          "2026-07-14T11:12:05Z"
-        ],
-        [
-          12.8,
-          62663.0,
-          "2026-07-14T11:12:45Z"
-        ]
-      ],
-      "volume_timeline": [
-        [
-          9.4,
-          410408.56,
-          "2026-07-14T11:09:23Z"
-        ],
-        [
-          10.1,
-          459927.97,
-          "2026-07-14T11:10:04Z"
-        ],
-        [
-          10.7,
-          483574.39,
-          "2026-07-14T11:10:44Z"
-        ],
-        [
-          11.4,
-          502044.56,
-          "2026-07-14T11:11:25Z"
-        ],
-        [
-          12.1,
-          521430.06,
-          "2026-07-14T11:12:05Z"
-        ],
-        [
-          12.8,
-          546464.11,
-          "2026-07-14T11:12:45Z"
-        ]
-      ],
-      "open_interest_timeline": [
-        [
-          9.4,
-          212501.02,
-          "2026-07-14T11:09:23Z"
-        ],
-        [
-          10.1,
-          227065.79,
-          "2026-07-14T11:10:04Z"
-        ],
-        [
-          10.7,
-          235875.2,
-          "2026-07-14T11:10:44Z"
-        ],
-        [
-          11.4,
-          236259.27,
-          "2026-07-14T11:11:25Z"
-        ],
-        [
-          12.1,
-          242576.98,
-          "2026-07-14T11:12:05Z"
-        ],
-        [
-          12.8,
-          256329.38,
-          "2026-07-14T11:12:45Z"
-        ]
-      ],
-      "yes_leaning_seconds": 0.0,
-      "no_leaning_seconds": 202.0
-    },
-    {
-      "ticker": "KXBTC15M-26JUL140700-00",
-      "event_ticker": "KXBTC15M-26JUL140700",
-      "title": "BTC price up in next 15 mins?",
-      "strike": 62711.87,
-      "open_time": "2026-07-14T10:45:00Z",
-      "close_time": "2026-07-14T11:00:00Z",
-      "status": "finalized",
-      "result": "yes",
-      "first_seen_ts": "2026-07-14T11:09:23Z",
-      "last_seen_ts": "2026-07-14T20:48:33Z",
-      "yes_prob_first": null,
-      "yes_prob_last": null,
-      "yes_prob_min": null,
-      "yes_prob_max": null,
-      "yes_bid_pct": null,
-      "yes_ask_pct": null,
-      "no_bid_pct": null,
-      "no_ask_pct": null,
-      "volume_max": 838996.34,
-      "open_interest": 232059.22,
-      "sample_count": 48,
-      "live_sample_count": 0,
-      "prob_timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": [],
-      "yes_leaning_seconds": 0.0,
-      "no_leaning_seconds": 0.0
-    },
-    {
-      "ticker": "KXBTC15M-26JUL140645-45",
-      "event_ticker": "KXBTC15M-26JUL140645",
-      "title": "BTC price up in next 15 mins?",
-      "strike": 62600.16,
-      "open_time": "2026-07-14T10:30:00Z",
-      "close_time": "2026-07-14T10:45:00Z",
-      "status": "finalized",
-      "result": "yes",
-      "first_seen_ts": "2026-07-14T11:09:23Z",
-      "last_seen_ts": "2026-07-14T20:45:11Z",
-      "yes_prob_first": null,
-      "yes_prob_last": null,
-      "yes_prob_min": null,
-      "yes_prob_max": null,
-      "yes_bid_pct": null,
-      "yes_ask_pct": null,
-      "no_bid_pct": null,
-      "no_ask_pct": null,
-      "volume_max": 756319.41,
-      "open_interest": 206638.36,
-      "sample_count": 43,
-      "live_sample_count": 0,
-      "prob_timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": [],
-      "yes_leaning_seconds": 0.0,
-      "no_leaning_seconds": 0.0
-    },
-    {
-      "ticker": "KXBTC15M-26JUL140630-30",
-      "event_ticker": "KXBTC15M-26JUL140630",
-      "title": "BTC price up in next 15 mins?",
-      "strike": 62648.47,
-      "open_time": "2026-07-14T10:15:00Z",
-      "close_time": "2026-07-14T10:30:00Z",
-      "status": "finalized",
-      "result": "no",
-      "first_seen_ts": "2026-07-14T11:09:23Z",
-      "last_seen_ts": "2026-07-14T19:49:40Z",
-      "yes_prob_first": null,
-      "yes_prob_last": null,
-      "yes_prob_min": null,
-      "yes_prob_max": null,
-      "yes_bid_pct": null,
-      "yes_ask_pct": null,
-      "no_bid_pct": null,
-      "no_ask_pct": null,
-      "volume_max": 833184.53,
-      "open_interest": 172127.03,
-      "sample_count": 42,
-      "live_sample_count": 0,
-      "prob_timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": [],
-      "yes_leaning_seconds": 0.0,
-      "no_leaning_seconds": 0.0
-    },
-    {
-      "ticker": "KXBTC15M-26JUL140615-15",
-      "event_ticker": "KXBTC15M-26JUL140615",
-      "title": "BTC price up in next 15 mins?",
-      "strike": 62560.26,
-      "open_time": "2026-07-14T10:00:00Z",
-      "close_time": "2026-07-14T10:15:00Z",
-      "status": "finalized",
-      "result": "yes",
-      "first_seen_ts": "2026-07-14T11:09:23Z",
-      "last_seen_ts": "2026-07-14T19:49:40Z",
-      "yes_prob_first": null,
-      "yes_prob_last": null,
-      "yes_prob_min": null,
-      "yes_prob_max": null,
-      "yes_bid_pct": null,
-      "yes_ask_pct": null,
-      "no_bid_pct": null,
-      "no_ask_pct": null,
-      "volume_max": 552547.19,
-      "open_interest": 254308.54,
-      "sample_count": 42,
-      "live_sample_count": 0,
-      "prob_timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": [],
-      "yes_leaning_seconds": 0.0,
-      "no_leaning_seconds": 0.0
-    },
-    {
-      "ticker": "KXBTC15M-26JUL140600-00",
-      "event_ticker": "KXBTC15M-26JUL140600",
-      "title": "BTC price up in next 15 mins?",
-      "strike": 62508.17,
-      "open_time": "2026-07-14T09:45:00Z",
-      "close_time": "2026-07-14T10:00:00Z",
-      "status": "finalized",
-      "result": "yes",
-      "first_seen_ts": "2026-07-14T11:09:23Z",
-      "last_seen_ts": "2026-07-14T19:49:40Z",
-      "yes_prob_first": null,
-      "yes_prob_last": null,
-      "yes_prob_min": null,
-      "yes_prob_max": null,
-      "yes_bid_pct": null,
-      "yes_ask_pct": null,
-      "no_bid_pct": null,
-      "no_ask_pct": null,
-      "volume_max": 812426.91,
-      "open_interest": 209779.24,
-      "sample_count": 42,
-      "live_sample_count": 0,
-      "prob_timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": [],
-      "yes_leaning_seconds": 0.0,
-      "no_leaning_seconds": 0.0
     }
   ],
   "insight_markets": [
+    {
+      "ticker": "KXBTC15M-26JUL142345-45",
+      "title": "BTC price up in next 15 mins?",
+      "open_time": "2026-07-15T03:30:00Z",
+      "close_time": "2026-07-15T03:45:00Z",
+      "strike": 64555.7,
+      "result": "yes",
+      "volume": 1740302.36,
+      "open_interest": 588520.86,
+      "timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": []
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142330-30",
+      "title": "BTC price up in next 15 mins?",
+      "open_time": "2026-07-15T03:15:00Z",
+      "close_time": "2026-07-15T03:30:00Z",
+      "strike": 64581.88,
+      "result": "no",
+      "volume": 1537583.48,
+      "open_interest": 509550.32,
+      "timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": []
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142315-15",
+      "title": "BTC price up in next 15 mins?",
+      "open_time": "2026-07-15T03:00:00Z",
+      "close_time": "2026-07-15T03:15:00Z",
+      "strike": 64453.05,
+      "result": "yes",
+      "volume": 1448715.89,
+      "open_interest": 603218.7,
+      "timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": []
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142300-00",
+      "title": "BTC price up in next 15 mins?",
+      "open_time": "2026-07-15T02:45:00Z",
+      "close_time": "2026-07-15T03:00:00Z",
+      "strike": 64510.33,
+      "result": "no",
+      "volume": 1315349.69,
+      "open_interest": 474287.64,
+      "timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": []
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142245-45",
+      "title": "BTC price up in next 15 mins?",
+      "open_time": "2026-07-15T02:30:00Z",
+      "close_time": "2026-07-15T02:45:00Z",
+      "strike": 64487.39,
+      "result": "yes",
+      "volume": 2127574.59,
+      "open_interest": 432105.54,
+      "timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": []
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142230-30",
+      "title": "BTC price up in next 15 mins?",
+      "open_time": "2026-07-15T02:15:00Z",
+      "close_time": "2026-07-15T02:30:00Z",
+      "strike": 64662.82,
+      "result": "no",
+      "volume": 1129935.77,
+      "open_interest": 607829.75,
+      "timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": []
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142215-15",
+      "title": "BTC price up in next 15 mins?",
+      "open_time": "2026-07-15T02:00:00Z",
+      "close_time": "2026-07-15T02:15:00Z",
+      "strike": 64629.87,
+      "result": "yes",
+      "volume": 1932959.09,
+      "open_interest": 486450.88,
+      "timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": []
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142200-00",
+      "title": "BTC price up in next 15 mins?",
+      "open_time": "2026-07-15T01:45:00Z",
+      "close_time": "2026-07-15T02:00:00Z",
+      "strike": 64640.32,
+      "result": "no",
+      "volume": 1768694.46,
+      "open_interest": 448059.84,
+      "timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": []
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142145-45",
+      "title": "BTC price up in next 15 mins?",
+      "open_time": "2026-07-15T01:30:00Z",
+      "close_time": "2026-07-15T01:45:00Z",
+      "strike": 64791.69,
+      "result": "no",
+      "volume": 1074690.69,
+      "open_interest": 485040.52,
+      "timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": []
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142130-30",
+      "title": "BTC price up in next 15 mins?",
+      "open_time": "2026-07-15T01:15:00Z",
+      "close_time": "2026-07-15T01:30:00Z",
+      "strike": 64701.74,
+      "result": "yes",
+      "volume": 1826008.11,
+      "open_interest": 509037.95,
+      "timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": []
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142115-15",
+      "title": "BTC price up in next 15 mins?",
+      "open_time": "2026-07-15T01:00:00Z",
+      "close_time": "2026-07-15T01:15:00Z",
+      "strike": 64788.43,
+      "result": "no",
+      "volume": 1357913.93,
+      "open_interest": 604219.63,
+      "timeline": [],
+      "diff_timeline": [],
+      "btc_timeline": [],
+      "volume_timeline": [],
+      "open_interest_timeline": []
+    },
+    {
+      "ticker": "KXBTC15M-26JUL142100-00",
+      "title": "BTC price up in next 15 mins?",
+      "open_time": "2026-07-15T00:45:00Z",
+      "close_time": "2026-07-15T01:00:00Z",
+      "strike": 64738.39,
+      "result": "yes",
+      "volume": 1295624.39,
+      "open_interest": 390390.92,
+      "timeline": [
+        [
+          8.8,
+          77.5,
+          "2026-07-15T00:53:45Z"
+        ],
+        [
+          9.4,
+          79.5,
+          "2026-07-15T00:54:26Z"
+        ],
+        [
+          10.1,
+          92.2,
+          "2026-07-15T00:55:06Z"
+        ],
+        [
+          10.8,
+          91.8,
+          "2026-07-15T00:55:46Z"
+        ],
+        [
+          11.4,
+          97.0,
+          "2026-07-15T00:56:26Z"
+        ],
+        [
+          12.1,
+          98.8,
+          "2026-07-15T00:57:07Z"
+        ]
+      ],
+      "diff_timeline": [
+        [
+          8.8,
+          29.61,
+          "2026-07-15T00:53:45Z"
+        ],
+        [
+          9.4,
+          33.61,
+          "2026-07-15T00:54:26Z"
+        ],
+        [
+          10.1,
+          33.61,
+          "2026-07-15T00:55:06Z"
+        ],
+        [
+          10.8,
+          33.61,
+          "2026-07-15T00:55:46Z"
+        ],
+        [
+          11.4,
+          42.61,
+          "2026-07-15T00:56:26Z"
+        ],
+        [
+          12.1,
+          45.61,
+          "2026-07-15T00:57:07Z"
+        ]
+      ],
+      "btc_timeline": [
+        [
+          8.8,
+          64768.0,
+          "2026-07-15T00:53:45Z"
+        ],
+        [
+          9.4,
+          64772.0,
+          "2026-07-15T00:54:26Z"
+        ],
+        [
+          10.1,
+          64772.0,
+          "2026-07-15T00:55:06Z"
+        ],
+        [
+          10.8,
+          64772.0,
+          "2026-07-15T00:55:46Z"
+        ],
+        [
+          11.4,
+          64781.0,
+          "2026-07-15T00:56:26Z"
+        ],
+        [
+          12.1,
+          64784.0,
+          "2026-07-15T00:57:07Z"
+        ]
+      ],
+      "volume_timeline": [
+        [
+          8.8,
+          763282.51,
+          "2026-07-15T00:53:45Z"
+        ],
+        [
+          9.4,
+          798739.63,
+          "2026-07-15T00:54:26Z"
+        ],
+        [
+          10.1,
+          856359.38,
+          "2026-07-15T00:55:06Z"
+        ],
+        [
+          10.8,
+          949066.17,
+          "2026-07-15T00:55:46Z"
+        ],
+        [
+          11.4,
+          1068257.96,
+          "2026-07-15T00:56:26Z"
+        ],
+        [
+          12.1,
+          1140635.26,
+          "2026-07-15T00:57:07Z"
+        ]
+      ],
+      "open_interest_timeline": [
+        [
+          8.8,
+          327189.06,
+          "2026-07-15T00:53:45Z"
+        ],
+        [
+          9.4,
+          332580.05,
+          "2026-07-15T00:54:26Z"
+        ],
+        [
+          10.1,
+          338213.91,
+          "2026-07-15T00:55:06Z"
+        ],
+        [
+          10.8,
+          370562.5,
+          "2026-07-15T00:55:46Z"
+        ],
+        [
+          11.4,
+          383925.31,
+          "2026-07-15T00:56:26Z"
+        ],
+        [
+          12.1,
+          390390.92,
+          "2026-07-15T00:57:07Z"
+        ]
+      ]
+    },
     {
       "ticker": "KXBTC15M-26JUL142045-45",
       "title": "BTC price up in next 15 mins?",
@@ -19230,666 +19410,10 @@
       "btc_timeline": [],
       "volume_timeline": [],
       "open_interest_timeline": []
-    },
-    {
-      "ticker": "KXBTC15M-26JUL101945-45",
-      "title": "BTC price up in next 15 mins?",
-      "open_time": "2026-07-10T23:30:00Z",
-      "close_time": "2026-07-10T23:45:00Z",
-      "strike": 64161.5,
-      "result": "no",
-      "volume": 1256943.61,
-      "open_interest": 155586.07,
-      "timeline": [
-        [
-          0.9,
-          49.5,
-          "2026-07-10T23:30:57Z"
-        ],
-        [
-          1.6,
-          48.5,
-          "2026-07-10T23:31:37Z"
-        ],
-        [
-          2.3,
-          34.5,
-          "2026-07-10T23:32:17Z"
-        ],
-        [
-          3.0,
-          44.5,
-          "2026-07-10T23:32:57Z"
-        ],
-        [
-          3.6,
-          42.5,
-          "2026-07-10T23:33:38Z"
-        ],
-        [
-          4.3,
-          43.5,
-          "2026-07-10T23:34:18Z"
-        ]
-      ],
-      "diff_timeline": [
-        [
-          0.9,
-          -14.5,
-          "2026-07-10T23:30:57Z"
-        ],
-        [
-          1.6,
-          -14.5,
-          "2026-07-10T23:31:37Z"
-        ],
-        [
-          2.3,
-          -10.5,
-          "2026-07-10T23:32:17Z"
-        ],
-        [
-          3.0,
-          -10.5,
-          "2026-07-10T23:32:57Z"
-        ],
-        [
-          3.6,
-          -10.5,
-          "2026-07-10T23:33:38Z"
-        ],
-        [
-          4.3,
-          -20.5,
-          "2026-07-10T23:34:18Z"
-        ]
-      ],
-      "btc_timeline": [
-        [
-          0.9,
-          64147.0,
-          "2026-07-10T23:30:57Z"
-        ],
-        [
-          1.6,
-          64147.0,
-          "2026-07-10T23:31:37Z"
-        ],
-        [
-          2.3,
-          64151.0,
-          "2026-07-10T23:32:17Z"
-        ],
-        [
-          3.0,
-          64151.0,
-          "2026-07-10T23:32:57Z"
-        ],
-        [
-          3.6,
-          64151.0,
-          "2026-07-10T23:33:38Z"
-        ],
-        [
-          4.3,
-          64141.0,
-          "2026-07-10T23:34:18Z"
-        ]
-      ],
-      "volume_timeline": [
-        [
-          0.9,
-          83873.59,
-          "2026-07-10T23:30:57Z"
-        ],
-        [
-          1.6,
-          133850.23,
-          "2026-07-10T23:31:37Z"
-        ],
-        [
-          2.3,
-          178427.91,
-          "2026-07-10T23:32:17Z"
-        ],
-        [
-          3.0,
-          239501.32,
-          "2026-07-10T23:32:57Z"
-        ],
-        [
-          3.6,
-          265468.55,
-          "2026-07-10T23:33:38Z"
-        ],
-        [
-          4.3,
-          324761.69,
-          "2026-07-10T23:34:18Z"
-        ]
-      ],
-      "open_interest_timeline": [
-        [
-          0.9,
-          62474.2,
-          "2026-07-10T23:30:57Z"
-        ],
-        [
-          1.6,
-          93246.11,
-          "2026-07-10T23:31:37Z"
-        ],
-        [
-          2.3,
-          105034.61,
-          "2026-07-10T23:32:17Z"
-        ],
-        [
-          3.0,
-          120592.32,
-          "2026-07-10T23:32:57Z"
-        ],
-        [
-          3.6,
-          135200.8,
-          "2026-07-10T23:33:38Z"
-        ],
-        [
-          4.3,
-          155586.07,
-          "2026-07-10T23:34:18Z"
-        ]
-      ]
-    },
-    {
-      "ticker": "KXBTC15M-26JUL101930-30",
-      "title": "BTC price up in next 15 mins?",
-      "open_time": "2026-07-10T23:15:00Z",
-      "close_time": "2026-07-10T23:30:00Z",
-      "strike": 64055.65,
-      "result": "yes",
-      "volume": 1110992.85,
-      "open_interest": 514164.14,
-      "timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": []
-    },
-    {
-      "ticker": "KXBTC15M-26JUL101915-15",
-      "title": "BTC price up in next 15 mins?",
-      "open_time": "2026-07-10T23:00:00Z",
-      "close_time": "2026-07-10T23:15:00Z",
-      "strike": 64078.51,
-      "result": "no",
-      "volume": 1354443.37,
-      "open_interest": 530677.99,
-      "timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": []
-    },
-    {
-      "ticker": "KXBTC15M-26JUL101900-00",
-      "title": "BTC price up in next 15 mins?",
-      "open_time": "2026-07-10T22:45:00Z",
-      "close_time": "2026-07-10T23:00:00Z",
-      "strike": 64094.09,
-      "result": "no",
-      "volume": 1859291.71,
-      "open_interest": 351266.49,
-      "timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": []
-    },
-    {
-      "ticker": "KXBTC15M-26JUL101845-45",
-      "title": "BTC price up in next 15 mins?",
-      "open_time": "2026-07-10T22:30:00Z",
-      "close_time": "2026-07-10T22:45:00Z",
-      "strike": 64097.19,
-      "result": "no",
-      "volume": 1927694.03,
-      "open_interest": 170342.73,
-      "timeline": [
-        [
-          0.6,
-          46.5,
-          "2026-07-10T22:30:35Z"
-        ],
-        [
-          1.2,
-          55.5,
-          "2026-07-10T22:31:15Z"
-        ],
-        [
-          1.9,
-          56.5,
-          "2026-07-10T22:31:56Z"
-        ]
-      ],
-      "diff_timeline": [
-        [
-          0.6,
-          -28.19,
-          "2026-07-10T22:30:35Z"
-        ],
-        [
-          1.2,
-          -21.19,
-          "2026-07-10T22:31:15Z"
-        ],
-        [
-          1.9,
-          -3.19,
-          "2026-07-10T22:31:56Z"
-        ]
-      ],
-      "btc_timeline": [
-        [
-          0.6,
-          64069.0,
-          "2026-07-10T22:30:35Z"
-        ],
-        [
-          1.2,
-          64076.0,
-          "2026-07-10T22:31:15Z"
-        ],
-        [
-          1.9,
-          64094.0,
-          "2026-07-10T22:31:56Z"
-        ]
-      ],
-      "volume_timeline": [
-        [
-          0.6,
-          1019.33,
-          "2026-07-10T22:30:35Z"
-        ],
-        [
-          1.2,
-          188339.56,
-          "2026-07-10T22:31:15Z"
-        ],
-        [
-          1.9,
-          242711.21,
-          "2026-07-10T22:31:56Z"
-        ]
-      ],
-      "open_interest_timeline": [
-        [
-          0.6,
-          763.43,
-          "2026-07-10T22:30:35Z"
-        ],
-        [
-          1.2,
-          129902.09,
-          "2026-07-10T22:31:15Z"
-        ],
-        [
-          1.9,
-          170342.73,
-          "2026-07-10T22:31:56Z"
-        ]
-      ]
-    },
-    {
-      "ticker": "KXBTC15M-26JUL101830-30",
-      "title": "BTC price up in next 15 mins?",
-      "open_time": "2026-07-10T22:15:00Z",
-      "close_time": "2026-07-10T22:30:00Z",
-      "strike": 64015.4,
-      "result": "yes",
-      "volume": 1815950.53,
-      "open_interest": 415810.27,
-      "timeline": [
-        [
-          13.6,
-          99.8,
-          "2026-07-10T22:28:33Z"
-        ],
-        [
-          14.2,
-          100.0,
-          "2026-07-10T22:29:14Z"
-        ],
-        [
-          14.9,
-          100.0,
-          "2026-07-10T22:29:54Z"
-        ]
-      ],
-      "diff_timeline": [
-        [
-          13.6,
-          7.6,
-          "2026-07-10T22:28:33Z"
-        ],
-        [
-          14.2,
-          17.6,
-          "2026-07-10T22:29:14Z"
-        ],
-        [
-          14.9,
-          53.6,
-          "2026-07-10T22:29:54Z"
-        ]
-      ],
-      "btc_timeline": [
-        [
-          13.6,
-          64023.0,
-          "2026-07-10T22:28:33Z"
-        ],
-        [
-          14.2,
-          64033.0,
-          "2026-07-10T22:29:14Z"
-        ],
-        [
-          14.9,
-          64069.0,
-          "2026-07-10T22:29:54Z"
-        ]
-      ],
-      "volume_timeline": [
-        [
-          13.6,
-          1737014.65,
-          "2026-07-10T22:28:33Z"
-        ],
-        [
-          14.2,
-          1773281.43,
-          "2026-07-10T22:29:14Z"
-        ],
-        [
-          14.9,
-          1805532.43,
-          "2026-07-10T22:29:54Z"
-        ]
-      ],
-      "open_interest_timeline": [
-        [
-          13.6,
-          360281.63,
-          "2026-07-10T22:28:33Z"
-        ],
-        [
-          14.2,
-          390048.98,
-          "2026-07-10T22:29:14Z"
-        ],
-        [
-          14.9,
-          415810.27,
-          "2026-07-10T22:29:54Z"
-        ]
-      ]
-    },
-    {
-      "ticker": "KXBTC15M-26JUL101815-15",
-      "title": "BTC price up in next 15 mins?",
-      "open_time": "2026-07-10T22:00:00Z",
-      "close_time": "2026-07-10T22:15:00Z",
-      "strike": 63972.44,
-      "result": "yes",
-      "volume": 1623233.69,
-      "open_interest": 368720.9,
-      "timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": []
-    },
-    {
-      "ticker": "KXBTC15M-26JUL101800-00",
-      "title": "BTC price up in next 15 mins?",
-      "open_time": "2026-07-10T21:45:00Z",
-      "close_time": "2026-07-10T22:00:00Z",
-      "strike": 63996.55,
-      "result": "no",
-      "volume": 1679679.14,
-      "open_interest": 416243.48,
-      "timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": []
-    },
-    {
-      "ticker": "KXBTC15M-26JUL101745-45",
-      "title": "BTC price up in next 15 mins?",
-      "open_time": "2026-07-10T21:30:00Z",
-      "close_time": "2026-07-10T21:45:00Z",
-      "strike": 63970.94,
-      "result": "yes",
-      "volume": 1912140.06,
-      "open_interest": 441041.48,
-      "timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": []
-    },
-    {
-      "ticker": "KXBTC15M-26JUL101730-30",
-      "title": "BTC price up in next 15 mins?",
-      "open_time": "2026-07-10T21:15:00Z",
-      "close_time": "2026-07-10T21:30:00Z",
-      "strike": 63903.18,
-      "result": "yes",
-      "volume": 1311377.92,
-      "open_interest": 250868.26,
-      "timeline": [
-        [
-          5.2,
-          55.5,
-          "2026-07-10T21:20:11Z"
-        ],
-        [
-          5.8,
-          45.5,
-          "2026-07-10T21:20:51Z"
-        ],
-        [
-          6.5,
-          41.5,
-          "2026-07-10T21:21:31Z"
-        ],
-        [
-          7.2,
-          48.5,
-          "2026-07-10T21:22:12Z"
-        ],
-        [
-          7.9,
-          63.5,
-          "2026-07-10T21:22:52Z"
-        ],
-        [
-          8.5,
-          66.5,
-          "2026-07-10T21:23:32Z"
-        ]
-      ],
-      "diff_timeline": [
-        [
-          5.2,
-          -0.18,
-          "2026-07-10T21:20:11Z"
-        ],
-        [
-          5.8,
-          0.82,
-          "2026-07-10T21:20:51Z"
-        ],
-        [
-          6.5,
-          0.82,
-          "2026-07-10T21:21:31Z"
-        ],
-        [
-          7.2,
-          -11.18,
-          "2026-07-10T21:22:12Z"
-        ],
-        [
-          7.9,
-          -11.18,
-          "2026-07-10T21:22:52Z"
-        ],
-        [
-          8.5,
-          -11.18,
-          "2026-07-10T21:23:32Z"
-        ]
-      ],
-      "btc_timeline": [
-        [
-          5.2,
-          63903.0,
-          "2026-07-10T21:20:11Z"
-        ],
-        [
-          5.8,
-          63904.0,
-          "2026-07-10T21:20:51Z"
-        ],
-        [
-          6.5,
-          63904.0,
-          "2026-07-10T21:21:31Z"
-        ],
-        [
-          7.2,
-          63892.0,
-          "2026-07-10T21:22:12Z"
-        ],
-        [
-          7.9,
-          63892.0,
-          "2026-07-10T21:22:52Z"
-        ],
-        [
-          8.5,
-          63892.0,
-          "2026-07-10T21:23:32Z"
-        ]
-      ],
-      "volume_timeline": [
-        [
-          5.2,
-          411241.63,
-          "2026-07-10T21:20:11Z"
-        ],
-        [
-          5.8,
-          451659.75,
-          "2026-07-10T21:20:51Z"
-        ],
-        [
-          6.5,
-          488668.83,
-          "2026-07-10T21:21:31Z"
-        ],
-        [
-          7.2,
-          545431.01,
-          "2026-07-10T21:22:12Z"
-        ],
-        [
-          7.9,
-          608353.15,
-          "2026-07-10T21:22:52Z"
-        ],
-        [
-          8.5,
-          659841.72,
-          "2026-07-10T21:23:32Z"
-        ]
-      ],
-      "open_interest_timeline": [
-        [
-          5.2,
-          197655.34,
-          "2026-07-10T21:20:11Z"
-        ],
-        [
-          5.8,
-          203506.54,
-          "2026-07-10T21:20:51Z"
-        ],
-        [
-          6.5,
-          207916.0,
-          "2026-07-10T21:21:31Z"
-        ],
-        [
-          7.2,
-          222580.63,
-          "2026-07-10T21:22:12Z"
-        ],
-        [
-          7.9,
-          229716.09,
-          "2026-07-10T21:22:52Z"
-        ],
-        [
-          8.5,
-          250868.26,
-          "2026-07-10T21:23:32Z"
-        ]
-      ]
-    },
-    {
-      "ticker": "KXBTC15M-26JUL101715-15",
-      "title": "BTC price up in next 15 mins?",
-      "open_time": "2026-07-10T21:00:00Z",
-      "close_time": "2026-07-10T21:15:00Z",
-      "strike": 63801.78,
-      "result": "yes",
-      "volume": 1340420.62,
-      "open_interest": 542621.47,
-      "timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": []
-    },
-    {
-      "ticker": "KXBTC15M-26JUL101700-00",
-      "title": "BTC price up in next 15 mins?",
-      "open_time": "2026-07-10T20:45:00Z",
-      "close_time": "2026-07-10T21:00:00Z",
-      "strike": 63847.49,
-      "result": "no",
-      "volume": 1461361.18,
-      "open_interest": 449310.52,
-      "timeline": [],
-      "diff_timeline": [],
-      "btc_timeline": [],
-      "volume_timeline": [],
-      "open_interest_timeline": []
     }
   ],
   "series": {
     "timestamps": [
-      "2026-07-11T22:07:40Z",
-      "2026-07-11T22:08:20Z",
-      "2026-07-11T22:09:01Z",
-      "2026-07-11T22:09:41Z",
-      "2026-07-11T22:10:21Z",
-      "2026-07-11T22:11:02Z",
       "2026-07-11T23:06:31Z",
       "2026-07-11T23:07:11Z",
       "2026-07-11T23:07:51Z",
@@ -20171,15 +19695,15 @@
       "2026-07-15T00:55:06Z",
       "2026-07-15T00:55:46Z",
       "2026-07-15T00:56:26Z",
-      "2026-07-15T00:57:07Z"
+      "2026-07-15T00:57:07Z",
+      "2026-07-15T03:52:20Z",
+      "2026-07-15T03:53:00Z",
+      "2026-07-15T03:53:40Z",
+      "2026-07-15T03:54:21Z",
+      "2026-07-15T03:55:01Z",
+      "2026-07-15T03:55:41Z"
     ],
     "btc_usd": [
-      64290.0,
-      64290.0,
-      64296.0,
-      64304.0,
-      64315.0,
-      64315.0,
       64187.0,
       64187.0,
       64190.0,
@@ -20461,15 +19985,15 @@
       64772.0,
       64772.0,
       64781.0,
-      64784.0
+      64784.0,
+      64702.0,
+      64702.0,
+      64737.0,
+      64759.0,
+      64759.0,
+      64733.0
     ],
     "strike_usd": [
-      64317.48,
-      64317.48,
-      64317.48,
-      64317.48,
-      64317.48,
-      64317.48,
       64164.02,
       64164.02,
       64164.02,
@@ -20751,15 +20275,15 @@
       64738.39,
       64738.39,
       64738.39,
-      64738.39
+      64738.39,
+      64653.01,
+      64653.01,
+      64653.01,
+      64653.01,
+      64653.01,
+      64653.01
     ],
     "yes_bid_pct": [
-      46.0,
-      40.0,
-      55.0,
-      49.0,
-      81.0,
-      97.5,
       82.0,
       89.0,
       69.0,
@@ -21041,15 +20565,15 @@
       92.1,
       91.8,
       96.9,
-      98.7
+      98.7,
+      97.1,
+      98.4,
+      96.6,
+      94.7,
+      97.3,
+      99.3
     ],
     "no_bid_pct": [
-      52.0,
-      59.0,
-      44.0,
-      50.0,
-      18.0,
-      2.4,
       17.0,
       10.0,
       30.0,
@@ -21331,15 +20855,15 @@
       7.8,
       8.1,
       2.9,
-      1.2
+      1.2,
+      2.7,
+      1.3,
+      3.3,
+      5.0,
+      2.3,
+      0.6
     ],
     "yes_prob_pct": [
-      47.0,
-      40.5,
-      55.5,
-      49.5,
-      81.5,
-      97.5,
       82.5,
       89.5,
       69.5,
@@ -21621,15 +21145,15 @@
       92.2,
       91.8,
       97.0,
-      98.8
+      98.8,
+      97.2,
+      98.6,
+      96.7,
+      94.8,
+      97.5,
+      99.3
     ],
     "volatility_pct": [
-      0.038,
-      0.038,
-      0.0378,
-      0.0379,
-      0.0382,
-      0.0382,
       0.0585,
       0.0585,
       0.0587,
@@ -21911,7 +21435,13 @@
       0.0529,
       0.0533,
       0.0535,
-      0.0537
+      0.0537,
+      0.0578,
+      0.0573,
+      0.0596,
+      0.0612,
+      0.0611,
+      0.0614
     ]
   }
 }
